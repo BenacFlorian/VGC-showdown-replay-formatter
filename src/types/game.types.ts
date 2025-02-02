@@ -7,6 +7,7 @@ export interface Pokemon {
 }
 
 export interface Player {
+  id: string;
   name: string;
   rating?: number;
   new_rating?: number;
@@ -14,8 +15,8 @@ export interface Player {
 }
 
 export interface Action {
-  player: string;
-  pokemon: string;
+  player?: string;
+  pokemon?: string;
   action: string;
   move?: string;
   target?: string;
@@ -29,6 +30,7 @@ export interface Action {
   resisted?: string;
   redirected?: boolean;
   playerTarget?: string;
+  from?: string;
 }
 
 export interface Turn {
@@ -38,6 +40,7 @@ export interface Turn {
 
 export interface GameInfo {
   game_type: string;
+  leads: string[];
   start_time: number;
   tier: string;
   rules: string[];
