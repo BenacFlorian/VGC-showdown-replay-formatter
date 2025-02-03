@@ -30,10 +30,11 @@ export class ParseLogsService {
         let turnActions: Action[] = [];
         let currentTurn: number = 0;
         let leadSent = 0;
+        let previousTurnPlayer;
         let gameStarted = false;
         for (const line of lines) {
             const parts = line.split('|').filter(Boolean);
-             console.log(parts);
+            // if(currentTurn > 7)  console.log(parts);
             if (parts.length < 2 && parts[0] != 'start') continue;
     
             switch (parts[0]) {
@@ -84,7 +85,7 @@ export class ParseLogsService {
     
                 case 'turn':
                     // pour pouvoir debugger que jusqu'au tour X
-                    if(parseInt(parts[1]) > 5){
+                    if(parseInt(parts[1]) > 9){
                         return replayData;
                     }
                     if(parts[1] == '1'){
@@ -100,11 +101,13 @@ export class ParseLogsService {
                     turnActions = [];
                     break;
     
-                case 'move':                
+                case 'move':        
+                    const pokemonMoving = this.getPokemonMovingFromTeam(parts, replayData);
                     turnActions.push({
                       player: parts[1].split(':')[0],
                       pokemon: parts[1].split(':')[1], // Le Pokémon qui joue
                       action: 'move',
+                      itemPokemonMoving: pokemonMoving?.item,
                       redirected: parts.length > 4 && parts[4].includes('[from]lockedmove') ? true : false,
                       move: parts[2],
                       playerTarget: parts[3].split(':')[0],
@@ -125,15 +128,55 @@ export class ParseLogsService {
                 case '-immune':
                     turnActions.push({
                         action: 'immune',
-                        from: parts.length > 3 && parts[2].includes('[from]') ? parts[2].replace('[from]', '') : '',
+                        from: parts.length > 2 && parts[2].includes('[from]') ? parts[2].replace('[from]', '') : '',
                         move: turnActions[turnActions.length - 1].move,
                         target : parts[1].split(':')[1],
                         playerTarget: parts[1].split(':')[0],
                     });
                     break;
 
+                case '-enditem':
+                    turnActions.push({
+                        action: 'enditem',
+                        move: parts[2],
+                        player : parts[1].split(':')[0],
+                        pokemon : parts[1].split(':')[1],
+                        target : parts[1].split(':')[1],
+                        playerTarget: parts[1].split(':')[0],
+                    });
+                    break;
+                case '-end':
+                    if(parts[3] != '[silent]'){
+                        turnActions.push({
+                            action: 'end',
+                            move: parts[2],
+                            player : parts[1].split(':')[0],
+                            playerTarget : parts[1].split(':')[0],
+                            pokemon : parts[1].split(':')[1],
+                            target : parts[1].split(':')[1],
+                        });
+                    }
+                    break;
+
+                case 'cant' : 
+                    turnActions.push({
+                        action: 'cant',
+                        from: parts.length > 1 ? parts[2] : '',
+                        target : parts[1].split(':')[1],
+                        playerTarget: parts[1].split(':')[0],
+                    });
+                    break;
+
+                case '-curestatus' : 
+                    turnActions.push({
+                        action: 'curestatus',
+                        from: parts.length > 1 ?  parts[2] : '',
+                        target : parts[1].split(':')[1],
+                        playerTarget: parts[1].split(':')[0],
+                    });
+                    break;
+
                 case '-start': 
-                    console.log(parts);
                     turnActions.push({
                         action: 'start',
                         from: parts.length > 3 ? parts[3].replace('[','').replace(']','').replace('of','') : '',
@@ -142,20 +185,62 @@ export class ParseLogsService {
                         playerTarget: parts[1].split(':')[0],
                     });
                     break;
+
+                case '-sideend': 
+                    turnActions.push({
+                        action: 'sideend',
+                        move: parts[2],
+                        playerTarget: parts[1].split(':')[1],
+                    });
+                    break;
                 case '-fail':  
+                    const previousAction = turnActions[turnActions.length - 1];
+                    if(previousAction.playerTarget == '[still]'){
+                        turnActions[turnActions.length - 1].playerTarget = parts[1].split(':')[0];
+                    }
+
+                    let isSamePlayerWhoFail = false;
+                    if(this.getLastIndexTurnActionMove(turnActions) != -1){
+                        isSamePlayerWhoFail = turnActions[this.getLastIndexTurnActionMove(turnActions)].playerTarget == parts[1].split(':')[0];
+                    }
                     turnActions.push({
                         action: 'fail',
                         from: parts.length > 3 && parts[3].includes('[from]') ? parts[3].replace('[from]', '') : '',
-                        move: parts[2],
+                        move: parts[2] || previousAction.move,
                         target : parts[1].split(':')[1],
                         playerTarget: parts[1].split(':')[0],
+                        isSamePlayerWhoFail: isSamePlayerWhoFail
+                    });
+                    break;
+                
+                case '-clearboost': 
+                    turnActions.push({
+                        action: 'clearboost',
+                        playerTarget: parts[1].split(':')[0],
+                        target: parts[1].split(':')[1],
                     });
                     break;
                 
                 case '-boost':
-                  if(this.getLastIndexTurnActionMove(turnActions) != -1){
-                    turnActions[this.getLastIndexTurnActionMove(turnActions)].boost = `${parts[2]} ${parts[3]}`;
-                  }
+                  previousTurnPlayer = turnActions[turnActions.length - 1].player;
+                  if(previousTurnPlayer == parts[1].split(':')[0]){
+                    // boost is for the same pokemon with move this turn (close combat/make it rain...)
+                    if(!!turnActions[turnActions.length - 1].boost){
+                        turnActions[turnActions.length - 1].boost += `, ${parts[2]} ${parts[3]}`;
+                    }else{
+                        turnActions[turnActions.length - 1].boost = `${parts[2]} ${parts[3]}`;
+                    }
+                  }else{          
+                    // boost is due to an other pokemon than the one who's unboosted                   
+                    turnActions.push({
+                        player: parts[1].split(':')[0],
+                        pokemon: parts[1].split(':')[1], // Le Pokémon qui joue
+                        action: 'boost',
+                        boost: `${parts[2]} ${parts[3]}`,
+                        playerTarget: parts[3].split(':')[0],
+                        target: parts.length > 4 && parts[4].includes('spread')? parts[4] : parts[3].split(':')[1]
+                    });
+                  } 
                   break;
     
                 case '-resisted':
@@ -182,7 +267,7 @@ export class ParseLogsService {
                   break;
             
                 case '-unboost':
-                  const previousTurnPlayer = turnActions[turnActions.length - 1].player;
+                  previousTurnPlayer = turnActions[turnActions.length - 1].player;
                   if(previousTurnPlayer == parts[1].split(':')[0]){
                     // unboost is for the same pokemon with move this turn (close combat/make it rain...)
                     if(!!turnActions[turnActions.length - 1].unboost){
@@ -205,9 +290,38 @@ export class ParseLogsService {
     
                 case '-damage':
                   if(this.getLastIndexTurnActionMove(turnActions) != -1){
-                    turnActions[this.getLastIndexTurnActionMove(turnActions)].damage = (turnActions[this.getLastIndexTurnActionMove(turnActions)].damage || '') + parts[1] + '*' + parts[2] + ' |';
+                    if(parts.length > 3 && parts[3].includes('from')){
+                        turnActions.push({
+                            playerTarget: parts[1].split(':')[0],
+                            target: parts[1].split(':')[1],
+                            action: 'damageFrom',
+                            from: parts[3].replace('[from]', ''),
+                            damage: parts[1] + '*' + parts[2]
+                        })                        
+                    }else{
+                        turnActions[this.getLastIndexTurnActionMove(turnActions)].damage = (turnActions[this.getLastIndexTurnActionMove(turnActions)].damage || '') + parts[1] + '*' + parts[2] + ' |';
+                    }
                   }
                   break;
+
+                case '-status':
+                    turnActions.push({
+                        playerTarget: parts[1].split(':')[0],
+                        target: parts[1].split(': ')[1],
+                        action: 'status', 
+                        status: parts[2]
+                    });
+                    break;
+
+                case '-message':
+                    if(parts[1].includes('forfeited')){
+                        turnActions.push({
+                            action: 'forfeit',
+                            player: parts[1].split(':')[0],
+                        });
+                    }
+                    break;
+    
     
                 case 'switch':
                     if(leadSent < 4){
@@ -270,6 +384,13 @@ export class ParseLogsService {
     
         replayData.pov = players['p1'].name;
         return replayData;
+      }
+
+      private getPokemonMovingFromTeam(parts: string[], replayData: ReplayData): Pokemon {
+        const playerFromParts = parts[1].split(':')[0];
+        const pokemon = parts[1].split(':')[1];
+        const team = replayData.game.players.find(player=> playerFromParts.replace('a','').replace('b','') == player.id)?.team;
+        return team?.find(poke=> poke.pokemon == pokemon.trim() || poke.pokemon.includes(pokemon.trim())) as Pokemon;
       }
 
       private getLastIndexTurnActionMove(turnActions: Action[]): number {

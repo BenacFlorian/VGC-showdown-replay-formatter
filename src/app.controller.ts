@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post('format-replay')
+  @Post('format-replays')
   @HttpCode(200)
   formatReplay(@Body() data): Observable<string> {
     return this.appService.formatReplay(data);

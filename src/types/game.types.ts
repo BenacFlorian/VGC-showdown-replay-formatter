@@ -22,7 +22,8 @@ export interface Action {
   target?: string;
   targets?: string[];
   status?: string;
-  damage?: string;
+  damage?: string; 
+  itemPokemonMoving?: string;
   miss?: boolean;
   type?: string;
   boost?: string;
@@ -31,6 +32,7 @@ export interface Action {
   redirected?: boolean;
   playerTarget?: string;
   from?: string;
+  isSamePlayerWhoFail?: boolean;
 }
 
 export interface Turn {
