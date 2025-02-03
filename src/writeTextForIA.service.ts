@@ -89,6 +89,11 @@ export class WriteTextForIAService {
             });
         });
     
+        if(resultText.includes('Tour 0 :\n Tour 1')){
+            // replace turn 0 if nothing to say 
+            resultText = resultText.replace('Tour 0 :', '');
+        }
+
         // Résultat final
         resultText += `Le gagnant est ${replayData.game.final_result.winner}.`;
         if (replayData.game.final_result.forfeited) {

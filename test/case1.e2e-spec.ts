@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from './../src/app.module';
+import { AppModule } from '../src/app.module';
 import { of } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 
-describe('AppController (e2e)', () => {
+describe('Case 1', () => {
   let app: INestApplication;
   let httpService: HttpService;
 
@@ -176,15 +176,16 @@ describe('AppController (e2e)', () => {
 
   it('/format-replay (POST) should format replay correctly / Case 1', () => {
     return request(app.getHttpServer())
-      .post('/format-replay')
+      .post('/format-replays')
       .send(["https://replay.pokemonshowdown.com/gen9vgc2024reghbo3-2215811428-l9imjq5vo28buk78fuiprybu891ikn0pw.log"])
       .expect(200)
-      .expect((res) => {
-        const actual = JSON.parse(res.text)[0].replace(/\s+/g, ' ');
-        const expected = "Le match oppose Boscolachupagratis et NacDuBourgPalette. Tour 1 : Clefable de NacDuBourgPalette utilise Follow Me. Dragapult de Boscolachupagratis utilise U-turn sur Clefable de NacDuBourgPalette , et lui laisse 86/100 de point de vie , et ça a été résisté par Clefable. Kingambit est envoyé au combat. Gholdengo de NacDuBourgPalette utilise Nasty Plot, et augmente ses statistiques : spa 2. Magmar de Boscolachupagratis utilise Overheat sur Clefable de NacDuBourgPalette mais ça rate. Tour 2 : Magmar de Boscolachupagratis utilise Follow Me. Clefable de NacDuBourgPalette utilise Follow Me. Gholdengo de NacDuBourgPalette utilise Nasty Plot, et augmente ses statistiques : spa 2. Kingambit de Boscolachupagratis utilise Swords Dance, et augmente ses statistiques : atk 2. Tour 3 : Magmar de Boscolachupagratis utilise Follow Me. Clefable de NacDuBourgPalette utilise Follow Me. Gholdengo de NacDuBourgPalette utilise Make It Rain sur Magmar et Kingambit de Boscolachupagratis , et perd un boost de statistique : spa 1 , ça met Kingambit KO et laisse 16/100 de point de vie à Magmar , et ça a été résisté par Magmar et Kingambit. Kingambit est KO! Primarina est envoyé au combat. Tour 4 : Clefable de NacDuBourgPalette utilise Protect. Magmar de Boscolachupagratis utilise Follow Me. Gholdengo de NacDuBourgPalette utilise Make It Rain sur Magmar et Primarina de Boscolachupagratis , et perd un boost de statistique : spa 1 , ça met Magmar et Primarina KO , et ça a été résisté par Magmar. Magmar est KO! Primarina est KO! Dragapult est envoyé au combat. Tour 5 : Clefable de NacDuBourgPalette utilise Follow Me. Dragapult de Boscolachupagratis utilise Phantom Force et disparait . Gholdengo de NacDuBourgPalette utilise Make It Rain sur Dragapult de Boscolachupagratis mais ça rate. Tour 6 : Clefable de NacDuBourgPalette utilise Follow Me. Dragapult de Boscolachupagratis est redirigé vers Clefable et utilise Phantom Force sur Clefable de NacDuBourgPalette , et lui laisse 26/100 de point de vie . Gholdengo de NacDuBourgPalette utilise Make It Rain sur Dragapult de Boscolachupagratis , et perd un boost de statistique : spa 1 , ça met Dragapult KO . Dragapult est KO! Le gagnant est NacDuBourgPalette.".replace(/\s+/g, ' ');
-        if (actual !== expected) {
-          throw new Error('Response body does not match expected content');
-        }
+      .then(response => {
+        expect(response.text).toBeDefined();
+        
+        const actual = JSON.parse(response.text)[0].replace(/\s+/g, ' ');
+        const expected = "Le match oppose Boscolachupagratis et NacDuBourgPalette. Le joueur Boscolachupagratis a les Pokémons suivants : Magmar ( Niveau: 50, Item : , Ability : , Moves: ), Dragapult ( Niveau: 50, Item : , Ability : , Moves: ), Sneasler ( Niveau: 50, Item : , Ability : , Moves: ), Rillaboom ( Niveau: 50, Item : , Ability : , Moves: ), Kingambit ( Niveau: 50, Item : , Ability : , Moves: ), Primarina ( Niveau: 50, Item : , Ability : , Moves: ). Le joueur NacDuBourgPalette a les Pokémons suivants : Gholdengo ( Niveau: 50, Item : , Ability : , Moves: ), Dragapult ( Niveau: 50, Item : , Ability : , Moves: ), Rillaboom ( Niveau: 50, Item : , Ability : , Moves: ), Clefable ( Niveau: 50, Item : , Ability : , Moves: ), Incineroar ( Niveau: 50, Item : , Ability : , Moves: ), Sneasler ( Niveau: 50, Item : , Ability : , Moves: ). Le match commence ! Le joueur Boscolachupagratis envoie Magmar. Le joueur Boscolachupagratis envoie Dragapult. Le joueur NacDuBourgPalette envoie Gholdengo. Le joueur NacDuBourgPalette envoie Clefable. Tour 1 : Clefable de NacDuBourgPalette utilise Follow Me . Dragapult de Boscolachupagratis utilise U-turn sur Clefable de NacDuBourgPalette il lui laisse 86/100 de point de vie , ça a été résisté par Clefable. Kingambit est envoyé au combat. Gholdengo de NacDuBourgPalette utilise Nasty Plot , et gagne un boost de statistique : spa 2. Magmar de Boscolachupagratis utilise Overheat sur Clefable de NacDuBourgPalette mais ça rate. Tour 2 : Magmar de Boscolachupagratis utilise Follow Me . Clefable de NacDuBourgPalette utilise Follow Me . Gholdengo de NacDuBourgPalette utilise Nasty Plot , et gagne un boost de statistique : spa 2. Kingambit de Boscolachupagratis utilise Swords Dance , et gagne un boost de statistique : atk 2. Tour 3 : Magmar de Boscolachupagratis utilise Follow Me . Clefable de NacDuBourgPalette utilise Follow Me . Gholdengo de NacDuBourgPalette utilise Make It Rain (move de zone) sur Magmar de Boscolachupagratis et Kingambit de Boscolachupagratis , et perd un boost de statistique : spa 1, ça met Kingambit KO et laisse 16/100 de point de vie à Magmar , ça a été résisté par Magmar et Kingambit. Kingambit est KO! Primarina est envoyé au combat. Tour 4 : Clefable de NacDuBourgPalette utilise Protect . Magmar de Boscolachupagratis utilise Follow Me . Gholdengo de NacDuBourgPalette utilise Make It Rain (move de zone) sur Magmar de Boscolachupagratis et Primarina de Boscolachupagratis , et perd un boost de statistique : spa 1, ça met Magmar et Primarina KO , ça a été résisté par Magmar. Magmar est KO! Primarina est KO! Dragapult est envoyé au combat. Tour 5 : Clefable de NacDuBourgPalette utilise Follow Me . Dragapult de Boscolachupagratis utilise Phantom Force et disparait . Gholdengo de NacDuBourgPalette utilise Make It Rain sur Dragapult de Boscolachupagratis mais ça rate. Tour 6 : Clefable de NacDuBourgPalette utilise Follow Me . Dragapult de Boscolachupagratis est redirigé vers Clefable et utilise Phantom Force sur Clefable de NacDuBourgPalette il lui laisse 26/100 de point de vie . Clefable de NacDuBourgPalette utilise son item Sitrus Berry . Gholdengo de NacDuBourgPalette utilise Make It Rain sur Dragapult de Boscolachupagratis , et perd un boost de statistique : spa 1, ça met Dragapult KO . Dragapult est KO! Le gagnant est NacDuBourgPalette.".replace(/\s+/g, ' ');
+        
+        expect(actual).toBe(expected);
       });
   });
 
