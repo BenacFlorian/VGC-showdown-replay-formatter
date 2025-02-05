@@ -20,6 +20,7 @@ export interface Action {
   action: string;
   move?: string;
   target?: string;
+  pv?: string;
   targets?: string[];
   status?: string;
   damage?: string; 

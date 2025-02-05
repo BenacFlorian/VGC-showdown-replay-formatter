@@ -24,8 +24,21 @@ export class ActionTxtForIAService {
         }else{
             const playerTarget = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
             const actionTarget = action.playerTarget != action.player ? `${action.target} de ${playerTarget}` : '';
-            return action.playerTarget == '[still]' ? ' et disparait ' : ' sur ' + actionTarget;
+            if(action.playerTarget == '[still]'){
+                switch(action.move){
+                    case 'Solar Beam': return ' et rayonne';
+                    default: return ' et disparait ';
+                }
+            }else{
+                return ' sur ' + actionTarget;
+            };
         }
+    }
+
+    getAbility(action: Action): string {
+        let details = '';
+        if(action.move == 'Sword of Ruin') details = ', ce qui augmente les dégats physiques infligés aux pokemon alentours';
+        return `${action.pokemon} utilise sont talent : ${action.move}${details}. \n `;
     }
 
     getBoost(action: Action, moveDamage?: string): string {
@@ -51,6 +64,8 @@ export class ActionTxtForIAService {
         if(action.move === 'Light Screen') return `${action.move}, ce qui réduit de moitié les dégats spéciaux reçu par son équipe pour les tours à venir`;
         if(action.move === 'Wide Guard') return `${action.move}, ce qui protège son équipe des attaques de zones pour ce tour`;
         if(action.move === 'Imprison') return `${action.move}, ce qui empêche l'équipe adverse d'utiliser les attaques qu'il possède pour les tours a venir`;
+        if(action.move === 'Tailwind') return `${action.move}, ce qui double la vitesse des pokemon de son équipe pour 4 tours, celui la compris`;
+        if(action.move === 'Mist') return `${action.move}, ce qui bloque les modifications de statistiques induites par l'adversaire pendant 5 tours`;
 
         const isZoneMove = action.target?.includes('spread');
         return `${action.move} ${isZoneMove ? '(move de zone)' : ''}` || '';
@@ -130,14 +145,42 @@ export class ActionTxtForIAService {
                 break;
             case 'recharge': reason = 'il est en train de se recharger';
                 break;
+            case 'flinch': reason = 'il a été effrayé';
         }
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
         return `${action.target} de ${playerName} ne peut pas attaquer ce tour-ci car ${reason}. \n `;
     }
 
+    getFieldStart(action: Action, replayData: ReplayData): string {
+        const playerName = action.player?.includes("p2") ? replayData.game.players[1].name : replayData.game.players[0].name;
+        if(action.from?.includes('ability')){
+            return `${action.pokemon} de ${playerName} place son ${action.move} à cause de son talent : ${action.from?.split(':')[1]}. \n `;
+        }
+        // console.log(action);
+        if(action.move?.includes('Trick Room')){
+            return `Pendant 5 tours, l'ordre d'attaque des pokemons est inversé. \n `;
+        }
+        return `${action.pokemon} de ${playerName} place son ${action.move}. \n `;
+    }
+
+    getHeal(action: Action, replayData: ReplayData): string {
+        const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
+        const reason = !!action.from ? ` grâce à ${action.from}` : '';
+        if(!!action.move){
+            return `${action.target} de ${playerName} utilise ${action.move} et se soigne jusqu'a ${action.pv} point de vie. \n `;
+        }else{
+            return `${action.target} de ${playerName} est soigné jusqu'a ${action.pv} point de vie${reason}. \n `;
+        }        
+    }
+
+    getTerastallize(action: Action, replayData: ReplayData): string {
+        const playerName = action.player?.includes("p2") ? replayData.game.players[1].name : replayData.game.players[0].name;
+        return `${action.pokemon} de ${playerName} se teracrystalise en type ${action.type}. \n `;
+    }
+
     getClearboost(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `${action.target} de ${playerName} n'a plus de boost. \n `;
+        return `Les boosts de ${action.target} de ${playerName} ont été annulés. \n `;
     }
 
     getSideend(action: Action): string {

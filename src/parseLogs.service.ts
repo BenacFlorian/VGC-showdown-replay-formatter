@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Player, Pokemon, ReplayData, Action } from './types/game.types';
+import { time } from 'console';
 
 @Injectable()
 export class ParseLogsService {
@@ -34,7 +35,6 @@ export class ParseLogsService {
         let gameStarted = false;
         for (const line of lines) {
             const parts = line.split('|').filter(Boolean);
-            // if(currentTurn > 7)  console.log(parts);
             if (parts.length < 2 && parts[0] != 'start') continue;
     
             switch (parts[0]) {
@@ -85,7 +85,7 @@ export class ParseLogsService {
     
                 case 'turn':
                     // pour pouvoir debugger que jusqu'au tour X
-                    if(parseInt(parts[1]) > 9){
+                    if(parseInt(parts[1]) > 13){
                         return replayData;
                     }
                     if(parts[1] == '1'){
@@ -115,14 +115,14 @@ export class ParseLogsService {
                     });
                     break;
 
-                case '-ability':  
+                case '-ability': 
                     turnActions.push({
                         player: parts[1].split(':')[0],
                         pokemon: parts[1].split(':')[1], // Le Pokémon qui joue
                         action: 'ability',
                         move: parts[2],
-                        playerTarget: parts[3].split(':')[0],
-                        target: parts.length > 4 && parts[4].includes('spread')? parts[4] : parts[3].split(':')[1]
+                        playerTarget: parts.length > 3 ? parts[3].split(':')[0] : 'all',
+                        target: parts.length > 4 && parts[4].includes('spread')? parts[4] : (parts.length > 3 ? parts[3].split(':')[1] : 'all')
                     });
                     break;
                 case '-immune':
@@ -263,7 +263,6 @@ export class ParseLogsService {
                     target : parts[1].split(':')[1],
                     playerTarget: parts[1].split(':')[0],
                   });
-                  // turnActions[turnActions.length - 1].activate = true;
                   break;
             
                 case '-unboost':
@@ -303,6 +302,43 @@ export class ParseLogsService {
                     }
                   }
                   break;
+
+                case '-heal': 
+                    let isRecoverMove = false;
+                    if(this.getLastIndexTurnActionMove(turnActions) != -1){
+                        isRecoverMove = turnActions[this.getLastIndexTurnActionMove(turnActions)].move == 'Recover';
+                    }
+                    if(!isRecoverMove){
+                        turnActions.push({
+                            action: 'heal',
+                            target: parts[1].split(':')[1]?.trim(),
+                            playerTarget: parts[1].split(':')[0],
+                            from: parts[3]?.replace('[from]',''),
+                            pv: parts[2]
+                        });
+                    }else{
+                        if(this.getLastIndexTurnActionMove(turnActions) != -1){
+                            turnActions[this.getLastIndexTurnActionMove(turnActions)].pv = parts[2];
+                            turnActions[this.getLastIndexTurnActionMove(turnActions)].action = 'heal';
+                        }
+                    }
+                    break;
+                
+                case '-fieldstart':
+                    turnActions.push({
+                        action: 'fieldstart',
+                        move: parts[1].includes('move') ? parts[1].replace('move: ','') : parts[1],
+                        pokemon : parts.length > 3 ? parts[3].split(':')[1]?.trim() : parts[2].split(':')[1]?.trim(),
+                        from: parts[2].replace('[from]','').replace('[of]',''), 
+                        player: parts.length > 3 ? parts[3].split(':')[0].replace('[of]','') : parts[2].split(':')[0].replace('[of]','')
+                    });
+                    break;
+                case '-fieldend':
+                    turnActions.push({
+                        action: 'fieldend',
+                        move: parts[1].split(':')[1],
+                    });
+                    break;
 
                 case '-status':
                     turnActions.push({
@@ -344,8 +380,22 @@ export class ParseLogsService {
                         action: 'faint'
                     });
                     break;
+                case '-crit':
+                    turnActions.push({
+                        action: 'crit',
+                        target: parts[1].split(': ')[1],
+                        playerTarget: parts[1].split(':')[0],
+                    });
+                    break;
+                case '-supereffective':
+                    turnActions.push({
+                        action: 'supereffective',
+                        target: parts[1].split(': ')[1],
+                        playerTarget: parts[1].split(':')[0],
+                    });
+                    break;
     
-                case 'terastallize':
+                case '-terastallize':
                     turnActions.push({
                         player: parts[1].split(':')[0],
                         action: 'terastallize',
@@ -374,6 +424,10 @@ export class ParseLogsService {
                     leadSent = 0;
                     break;
             }
+            if(currentTurn > 3){// && turnActions[turnActions.length - 1]?.action == 'heal'){
+                // console.log(parts);
+                // console.log(turnActions[turnActions.length - 1]);
+            }
         }
         if (currentTurn !== null) {
             replayData.game.game_info.turns.push({
@@ -393,13 +447,13 @@ export class ParseLogsService {
         return team?.find(poke=> poke.pokemon == pokemon.trim() || poke.pokemon.includes(pokemon.trim())) as Pokemon;
       }
 
-      private getLastIndexTurnActionMove(turnActions: Action[]): number {
+      private getLastIndexTurnActionMove(turnActions: Action[], action: string = 'move'): number {
         // Si le tableau est vide, retourne -1 pour indiquer qu'aucun move n'a été trouvé
         if(turnActions.length == 0) return -1;
         
         // Parcours le tableau depuis la fin
         for(let i = turnActions.length - 1; i >= 0; i--) {
-            if(turnActions[i].action === 'move') {
+            if(turnActions[i].action === action) {
                 return i;
             }
         }

@@ -14,6 +14,15 @@ export class DamageTxtForIAService {
         return resisted_list?.length > 1 ?  `, ça a été résisté par ${resisted_list[0]} et ${resisted_list[1]}` : `, ça a été résisté par ${resisted_list[0]}`;
     }
 
+    getSupereffective(action: Action, replayData: ReplayData): string {
+        const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
+        return `C'est super efficace sur ${action.target} de ${playerName}. \n `;
+    }
+
+    getCrit(action: Action, replayData: ReplayData): string {
+        const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
+        return `C'est un coup critique sur ${action.target} de ${playerName}. \n `;
+    }
 
 
     getMoveDamage(action: Action): string {
@@ -94,6 +103,7 @@ export class DamageTxtForIAService {
             case 'confusion': return 'sa confusion';
             case 'Life Orb': return 'son item Life Orb';
             case 'Recoil': return 'recul';
+            case 'Salt Cure': return 'Salt Cure';
             default: return '';
         }
     }

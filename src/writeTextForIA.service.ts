@@ -5,6 +5,7 @@ import { UtilityService } from './services/utility.service';
 import { PokemonTxtForIAService } from './services/pokemon-txtForIA.service';
 import { DamageTxtForIAService } from './services/damage-txtForIA.service';
 import { ActionTxtForIAService } from './services/action-txtForIA.service';
+import { log } from 'console';
 
 @Injectable()
 export class WriteTextForIAService {
@@ -29,12 +30,16 @@ export class WriteTextForIAService {
     
         // Actions des tours
         replayData.game.game_info.turns.forEach(turn => {
+            // console.log("----------");
+            // console.log(turn.turn_number);
             resultText += `Tour ${turn.turn_number} :\n `;
             // if(turn.turn_number == 4) console.log(turn);
             turn.actions.forEach(action => {
+                // console.log(action);
                 // if(turn.turn_number > 4) console.log(action);
                 if (action.action === 'switch') {
-                  resultText += `${action.pokemon} est envoyé au combat. \n `;
+                    const player = action.player?.includes("p2") ? replayData.game.players[1].name : replayData.game.players[0].name;
+                    resultText += `${action.pokemon} de ${player} est envoyé au combat. \n `;
                 } else if (action.action === 'move') {
                     const player = action.player?.includes("p2") ? replayData.game.players[1].name : replayData.game.players[0].name;
                     const resisted = this.damageTxtForIAService.getResisted(action);
@@ -46,8 +51,6 @@ export class WriteTextForIAService {
                     const redirected = action.redirected ? `est redirigé vers ${action.target} et ` : '';
                     const move = this.actionTxtForIAService.getMove(action)
                     resultText += action.playerTarget != action.player ? `${action.pokemon} de ${player} ${redirected} utilise ${move} ${targets} ${unboost} ${moveDamage}${missed}${boost}${resisted}. \n ` : `${action.pokemon} de ${player} ${redirected}  utilise ${move}${missed}${boost}${unboost}. \n `;
-                } else if (action.action === 'terastallize') {
-                    resultText += `${action.pokemon} Terastallise ${action.pokemon} en type ${action.type}. \n `;
                 } else if (action.action === 'faint') {
                     resultText += `${action.pokemon} est KO! \n `;
                 } else if (action.action === 'boost') {
@@ -55,7 +58,7 @@ export class WriteTextForIAService {
                 } else if (action.action === 'unboost') {
                     resultText += `${action.pokemon} perd un boost de statistique : ${action.unboost}. \n `;
                 } else if (action.action === 'ability') {
-                    resultText += `${action.pokemon} utilise sont talent : ${action.move}. \n `;
+                    resultText += this.actionTxtForIAService.getAbility(action);
                 } else if (action.action === 'fail') {
                     resultText += this.actionTxtForIAService.getFail(action,replayData);
                 } else if(action.action === 'immune'){
@@ -85,6 +88,18 @@ export class WriteTextForIAService {
                     resultText += this.actionTxtForIAService.getClearboost(action, replayData);
                 } else if(action.action === 'forfeit'){
                     resultText += `${action.player?.replace('forfeited','').replace('.','').trim()} a abandonné. \n `;
+                } else if(action.action === 'fieldstart'){
+                    resultText += this.actionTxtForIAService.getFieldStart(action, replayData);
+                } else if(action.action === 'terastallize'){
+                    resultText += this.actionTxtForIAService.getTerastallize(action, replayData);
+                } else if(action.action === 'heal'){
+                    resultText += this.actionTxtForIAService.getHeal(action, replayData);
+                } else if(action.action === 'supereffective'){
+                    resultText += this.damageTxtForIAService.getSupereffective(action, replayData);
+                } else if(action.action === 'crit'){
+                    resultText += this.damageTxtForIAService.getCrit(action, replayData);
+                } else if(action.action === 'fieldend'){
+                    resultText += `Le champ ${action.move} a disparu. \n `;
                 }
             });
         });
