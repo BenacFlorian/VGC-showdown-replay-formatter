@@ -5,7 +5,7 @@ import { AppModule } from '../src/app.module';
 import { of } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 
-describe('Case 1', () => {
+describe('Case 2', () => {
   let app: INestApplication;
   let httpService: HttpService;
 
@@ -256,8 +256,8 @@ réduit de moitié les dégats spéciaux reçu par son équipe pour les tours à
 Close Combat sur Grimmsnarl de NacDuBourgPalette , et perd plusieurs boosts de statistique : def 1, spd 1, ça met
 Grimmsnarl KO . \n Grimmsnarl est KO! \n Torkoal de NacDuBourgPalette utilise Will-O-Wisp sur Garganacl de Smoukingrad .
 \n Garganacl est immunisé contre Will-O-Wisp à cause de son talent : Purifying Salt. \n Garganacl de Smoukingrad utilise
-Rest . \n La tentative de soin du Garganacl de Smoukingrad rate. \n Farigiraf est envoyé au combat. \n Tour 3 :\n
-Venusaur est envoyé au combat. \n Arcanine de Smoukingrad utilise Raging Fury sur Torkoal de NacDuBourgPalette il lui
+Rest . \n La tentative de soin du Garganacl de Smoukingrad rate. \n Farigiraf de NacDuBourgPalette est envoyé au combat. \n Tour 3 :\n
+Venusaur de Smoukingrad est envoyé au combat. \n Arcanine de Smoukingrad utilise Raging Fury sur Torkoal de NacDuBourgPalette il lui
 laisse 82/100 de point de vie , ça a été résisté par Torkoal. \n Farigiraf de NacDuBourgPalette utilise Hyper Beam sur
 Venusaur de Smoukingrad il lui laisse 13/100 de point de vie . \n Torkoal de NacDuBourgPalette utilise Yawn sur Arcanine
 de Smoukingrad . \n Arcanine deviens somnolent à cause de Torkoal, il s'endormira s'il attaque une fois de plus. \n Tour
@@ -268,12 +268,12 @@ statistique : spd 2. \n Venusaur de Smoukingrad subit des dégats de son item Li
 vie . \n Farigiraf de NacDuBourgPalette ne peut pas attaquer ce tour-ci car il est en train de se recharger. \n Torkoal
 de NacDuBourgPalette utilise Will-O-Wisp sur Venusaur de Smoukingrad . \n Venusaur de Smoukingrad est maintenant brulé.
 \n Venusaur de Smoukingrad subit des dégats de sa brûlure, ça met Venusaur KO . \n Venusaur est KO! \n Arcanine de
-Smoukingrad est maintenant endormi. \n Indeedee-F est envoyé au combat. \n Tour 5 :\n Arcanine de Smoukingrad ne peut
-pas attaquer ce tour-ci car il est endormi. \n Indeedee de Smoukingrad utilise Baton Pass . \n Garganacl est envoyé au
+Smoukingrad est maintenant endormi. \n Indeedee-F de Smoukingrad est envoyé au combat. \n  Indeedee de Smoukingrad place son Psychic Terrain à cause de son talent : Psychic Surge. \n Tour 5 :\n Arcanine de Smoukingrad ne peut
+pas attaquer ce tour-ci car il est endormi. \n Indeedee de Smoukingrad utilise Baton Pass . \n Garganacl de Smoukingrad est envoyé au
 combat. \n Farigiraf de NacDuBourgPalette utilise Imprison, ce qui empêche l'équipe adverse d'utiliser les attaques
 qu'il possède pour les tours a venir. \n Torkoal de NacDuBourgPalette utilise Shell Smash , et gagne plusieurs boost de
 statistiques : atk 2, spa 2, spe 2, et perd plusieurs boosts de statistique : def 1, spd 1. \n Reflect de
-NacDuBourgPalette n'a plus d'effet. \n Tour 6 :\n Amoonguss est envoyé au combat. \n Indeedee-F est envoyé au combat. \n
+NacDuBourgPalette n'a plus d'effet. \n Tour 6 :\n Amoonguss de NacDuBourgPalette est envoyé au combat. \n Indeedee-F de Smoukingrad est envoyé au combat. \n
 Arcanine de Smoukingrad est guéri de son statut : sommeil. \n Arcanine de Smoukingrad est confus. \n Arcanine de
 Smoukingrad utilise Protect . \n Farigiraf de NacDuBourgPalette utilise Hyper Voice (move de zone) sur Indeedee de
 Smoukingrad il lui laisse 68/100 de point de vie . \n Arcanine est protégé grâce à Protect. \n Farigiraf de
@@ -282,11 +282,11 @@ NacDuBourgPalette n'a plus d'effet. \n Tour 7 :\n Arcanine de Smoukingrad n'est 
 Smoukingrad utilise Protect . \n Indeedee de Smoukingrad utilise Follow Me . \n Farigiraf de NacDuBourgPalette utilise
 Imprison, ce qui empêche l'équipe adverse d'utiliser les attaques qu'il possède pour les tours a venir. \n La tentative
 de Imprison du Farigiraf de NacDuBourgPalette rate. \n Amoonguss de NacDuBourgPalette utilise Pollen Puff sur Indeedee
-de Smoukingrad il lui laisse 16/100 de point de vie . \n Tour 8 :\n Garganacl est envoyé au combat. \n Indeedee de
+de Smoukingrad il lui laisse 16/100 de point de vie . \n C'est super efficace sur Indeedee de Smoukingrad. \n Tour 8 :\n Garganacl de Smoukingrad est envoyé au combat. \n Indeedee de
 Smoukingrad utilise Healing Wish . \n Indeedee est KO! \n Farigiraf de NacDuBourgPalette utilise Hyper Beam sur
 Garganacl de Smoukingrad il lui laisse 46/100 de point de vie , ça a été résisté par Garganacl. \n Amoonguss de
 NacDuBourgPalette utilise Clear Smog sur Garganacl de Smoukingrad il lui laisse 36/100 de point de vie , ça a été
-résisté par Garganacl. \n Garganacl de Smoukingrad n'a plus de boost. \n Arcanine-Hisui est envoyé au combat. \n
+résisté par Garganacl. \n Les boosts de Garganacl de Smoukingrad ont été annulés. \n Arcanine-Hisui de Smoukingrad est envoyé au combat. \n Arcanine de Smoukingrad est soigné jusqu'a 100/100 point de vie grâce à move: Healing Wish. \n
 Arcanine utilise sont talent : Intimidate. \n Amoonguss perd un boost de statistique : atk 1. \n Farigiraf perd un boost
 de statistique : atk 1. \n Tour 9 :\n Smoukingrad a abandonné. \n Le gagnant est NacDuBourgPalette.`.replace(/\s+/g, ' ');
         
