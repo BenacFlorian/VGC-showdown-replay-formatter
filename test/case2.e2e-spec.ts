@@ -241,7 +241,7 @@ FollowMe, BatonPass, HealingWish, Psyshock ), Venusaur ( Niveau: 50, Item : Life
 SolarBeam, SludgeBomb, Protect, AcidSpray ), Arcanine-Hisui ( Niveau: 50, Item : FocusSash, Ability : Intimidate, Moves:
 HeadSmash, RagingFury, Protect, CloseCombat ), Garganacl ( Niveau: 50, Item : ScopeLens, Ability : PurifyingSalt, Moves:
 WideGuard, SaltCure, Rest, Explosion ), Roaring Moon ( Niveau: 50, Item : IapapaBerry, Ability : Protosynthesis, Moves:
-DragonCheer, Protect, Tailwind, BodySlam ). \n Le match commence ! \n Le joueur NacDuBourgPalette envoie Torkoal. \n Le
+DragonCheer, Protect, Tailwind, BodySlam ). Le pokemon Indeedee-F de Smoukingrad est renommé pour ce match Indeedee. Le pokemon Arcanine-Hisui de Smoukingrad est renommé pour ce match Arcanine. \n Le match commence ! \n Le joueur NacDuBourgPalette envoie Torkoal. \n Le
 joueur NacDuBourgPalette envoie Grimmsnarl. \n Le joueur Smoukingrad envoie Garganacl. \n Le joueur Smoukingrad envoie
 Arcanine. \n Tour 0 :\n Arcanine utilise sont talent : Intimidate. \n La tentative de réduction de statistique sur le
 Torkoal de NacDuBourgPalette rate à cause de son talent : White Smoke. \n Grimmsnarl perd un boost de statistique : atk

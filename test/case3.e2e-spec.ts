@@ -307,7 +307,7 @@ FollowMe, BatonPass, HealingWish, Psyshock ), Venusaur ( Niveau: 50, Item : Life
 SolarBeam, SludgeBomb, Protect, AcidSpray ), Arcanine-Hisui ( Niveau: 50, Item : FocusSash, Ability : Intimidate, Moves:
 HeadSmash, RagingFury, Protect, CloseCombat ), Garganacl ( Niveau: 50, Item : ScopeLens, Ability : PurifyingSalt, Moves:
 WideGuard, SaltCure, Rest, Explosion ), Roaring Moon ( Niveau: 50, Item : IapapaBerry, Ability : Protosynthesis, Moves:
-DragonCheer, Protect, Tailwind, BodySlam ). \n Le match commence ! \n Le joueur NacDuBourgPalette envoie Grimmsnarl. \n
+DragonCheer, Protect, Tailwind, BodySlam ). Le pokemon Calyrex-Ice de Smoukingrad est renommé pour ce match Calyrex. \n Le match commence ! \n Le joueur NacDuBourgPalette envoie Grimmsnarl. \n
 Le joueur NacDuBourgPalette envoie Rillaboom. \n Le joueur Smoukingrad envoie Garganacl. \n Le joueur Smoukingrad envoie
 Roaring Moon. \n Tour 0 :\n Rillaboom de NacDuBourgPalette place son Grassy Terrain à cause de son talent : Grassy
 Surge. \n Tour 1 :\n Roaring Moon de Smoukingrad utilise Protect . \n Rillaboom de NacDuBourgPalette utilise Fake Out

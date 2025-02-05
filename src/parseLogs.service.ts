@@ -7,7 +7,7 @@ export class ParseLogsService {
 
     public parseGameJson(rawData: string): ReplayData | null {
         const lines = rawData.split('\n');
-        const replayData: ReplayData = {
+        let replayData: ReplayData = {
             annotations: "",
             pov: "",
             game: {
@@ -35,6 +35,7 @@ export class ParseLogsService {
         let gameStarted = false;
         for (const line of lines) {
             const parts = line.split('|').filter(Boolean);
+            // console.log(parts);
             if (parts.length < 2 && parts[0] != 'start') continue;
     
             switch (parts[0]) {
@@ -328,9 +329,9 @@ export class ParseLogsService {
                     turnActions.push({
                         action: 'fieldstart',
                         move: parts[1].includes('move') ? parts[1].replace('move: ','') : parts[1],
-                        pokemon : parts.length > 3 ? parts[3].split(':')[1]?.trim() : parts[2].split(':')[1]?.trim(),
-                        from: parts[2].replace('[from]','').replace('[of]',''), 
-                        player: parts.length > 3 ? parts[3].split(':')[0].replace('[of]','') : parts[2].split(':')[0].replace('[of]','')
+                        pokemon : parts.length > 3 ? parts[3].split(':')[1]?.trim() : (parts.length > 2 ? parts[2].split(':')[1]?.trim() :  ''),
+                        from: parts.length > 2 ? parts[2].replace('[from]','').replace('[of]','') : '', 
+                        player: parts.length > 3 ? parts[3].split(':')[0].replace('[of]','') : (parts.length > 2 ? parts[2].split(':')[0].replace('[of]','') : '')
                     });
                     break;
                 case '-fieldend':
@@ -360,6 +361,7 @@ export class ParseLogsService {
     
     
                 case 'switch':
+                    replayData = this.setNickName(parts,replayData);
                     if(leadSent < 4){
                         replayData.game.game_info.leads.push(parts[1]);   
                         leadSent++;
@@ -437,6 +439,20 @@ export class ParseLogsService {
         }
     
         replayData.pov = players['p1'].name;
+        return replayData;
+      }
+
+      private setNickName(parts: string[], replayData: ReplayData): ReplayData {
+        const playerFromParts = parts[1].split(':')[0];
+        const playerIndex = replayData.game.players.findIndex(player=> playerFromParts.replace('a','').replace('b','') == player.id);
+        const indexPokemon = playerIndex != -1 ? replayData.game.players[playerIndex].team.findIndex(poke=> poke.pokemon == parts[2].split(', ')[0]) : -1;
+        if(indexPokemon != -1){
+            const nickname = parts[1].split(':')[1];
+            const pokemon = replayData.game.players[playerIndex].team[indexPokemon].pokemon;
+            if(nickname.trim() != pokemon.trim()){
+                replayData.game.players[playerIndex].team[indexPokemon].nickname = nickname?.trim();
+            }
+        }
         return replayData;
       }
 

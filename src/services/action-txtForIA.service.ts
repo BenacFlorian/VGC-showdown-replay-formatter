@@ -38,7 +38,7 @@ export class ActionTxtForIAService {
     getAbility(action: Action): string {
         let details = '';
         if(action.move == 'Sword of Ruin') details = ', ce qui augmente les dégats physiques infligés aux pokemon alentours';
-        return `${action.pokemon} utilise sont talent : ${action.move}${details}. \n `;
+        return `${action.pokemon} utilise sont talent : ${action.move}${details}.  `;
     }
 
     getBoost(action: Action, moveDamage?: string): string {
@@ -86,23 +86,23 @@ export class ActionTxtForIAService {
         const onWho = !action.isSamePlayerWhoFail ? 'sur le' : 'du';
 
         const playerName = replayData.game.players.find(player=> player.id == action.playerTarget?.replace('a','').replace('b',''))?.name;
-        return `La tentative de ${actionTextFr} ${onWho} ${action.target} de ${playerName} rate${becauseTextFr}. \n `;
+        return `La tentative de ${actionTextFr} ${onWho} ${action.target} de ${playerName} rate${becauseTextFr}.  `;
     }
 
     getImmune(action: Action): string {
         if(action.from?.includes('ability')){
-            return `${action.target} est immunisé contre ${action.move} à cause de son talent : ${action.from?.split(':')[1]}. \n `;
+            return `${action.target} est immunisé contre ${action.move} à cause de son talent : ${action.from?.split(':')[1]}.  `;
         }
-        return `${action.target} est immunisé contre ${action.move}. \n `;
+        return `${action.target} est immunisé contre ${action.move}.  `;
     }
 
     getActivate(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
         if(action.move?.includes('move:')){
-            return `${action.target} est protégé grâce à ${action.move?.replace('move: ', '')}. \n `;
+            return `${action.target} est protégé grâce à ${action.move?.replace('move: ', '')}.  `;
         }else{
             switch(action.move){
-                case 'confusion': return `${action.target} de ${playerName} est confus. \n `;
+                case 'confusion': return `${action.target} de ${playerName} est confus.  `;
                 default: return ``;
             }
         }
@@ -112,8 +112,8 @@ export class ActionTxtForIAService {
     getStart(action: Action): string {
         const move = action.move?.includes('move:') ? action.move?.replace('move: ', '') : action.move;
         switch(move){
-            case 'Yawn': return `${action.target} deviens somnolent à cause de ${action.from?.split(':')[1]}, il s'endormira s'il attaque une fois de plus. \n `;
-            case 'confusion': return `${action.target} deviens confus à cause de ${action.from === 'fatigue' ? ' la fatigue (un effet de son attaque)' : action.from}. \n `;
+            case 'Yawn': return `${action.target} deviens somnolent à cause de ${action.from?.split(':')[1]}, il s'endormira s'il attaque une fois de plus.  `;
+            case 'confusion': return `${action.target} deviens confus à cause de ${action.from === 'fatigue' ? ' la fatigue (un effet de son attaque)' : action.from}.  `;
         }
         return "";
     }
@@ -121,7 +121,7 @@ export class ActionTxtForIAService {
 
     getStatus(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `${action.target} de ${playerName} est maintenant ${this.getStatusFr(action.status || '')}. \n `;
+        return `${action.target} de ${playerName} est maintenant ${this.getStatusFr(action.status || '')}.  `;
     }
 
     getStatusFr(status: string): string {
@@ -148,49 +148,49 @@ export class ActionTxtForIAService {
             case 'flinch': reason = 'il a été effrayé';
         }
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `${action.target} de ${playerName} ne peut pas attaquer ce tour-ci car ${reason}. \n `;
+        return `${action.target} de ${playerName} ne peut pas attaquer ce tour-ci car ${reason}.  `;
     }
 
     getFieldStart(action: Action, replayData: ReplayData): string {
         const playerName = action.player?.includes("p2") ? replayData.game.players[1].name : replayData.game.players[0].name;
         if(action.from?.includes('ability')){
-            return `${action.pokemon} de ${playerName} place son ${action.move} à cause de son talent : ${action.from?.split(':')[1]}. \n `;
+            return `${action.pokemon} de ${playerName} place son ${action.move} à cause de son talent : ${action.from?.split(':')[1]}.  `;
         }
         // console.log(action);
         if(action.move?.includes('Trick Room')){
-            return `Pendant 5 tours, l'ordre d'attaque des pokemons est inversé. \n `;
+            return `Pendant 5 tours, l'ordre d'attaque des pokemons est inversé.  `;
         }
-        return `${action.pokemon} de ${playerName} place son ${action.move}. \n `;
+        return `${action.pokemon} de ${playerName} place son ${action.move}.  `;
     }
 
     getHeal(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
         const reason = !!action.from ? ` grâce à ${action.from}` : '';
         if(!!action.move){
-            return `${action.target} de ${playerName} utilise ${action.move} et se soigne jusqu'a ${action.pv} point de vie. \n `;
+            return `${action.target} de ${playerName} utilise ${action.move} et se soigne jusqu'a ${action.pv} point de vie.  `;
         }else{
-            return `${action.target} de ${playerName} est soigné jusqu'a ${action.pv} point de vie${reason}. \n `;
+            return `${action.target} de ${playerName} est soigné jusqu'a ${action.pv} point de vie${reason}.  `;
         }        
     }
 
     getTerastallize(action: Action, replayData: ReplayData): string {
         const playerName = action.player?.includes("p2") ? replayData.game.players[1].name : replayData.game.players[0].name;
-        return `${action.pokemon} de ${playerName} se teracrystalise en type ${action.type}. \n `;
+        return `${action.pokemon} de ${playerName} se teracrystalise en type ${action.type}.  `;
     }
 
     getClearboost(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `Les boosts de ${action.target} de ${playerName} ont été annulés. \n `;
+        return `Les boosts de ${action.target} de ${playerName} ont été annulés.  `;
     }
 
     getSideend(action: Action): string {
         const move = action.move?.includes('move:') ? action.move?.replace('move: ', '') : action.move;
-        return `${move} de ${action.playerTarget} n'a plus d'effet. \n `;
+        return `${move} de ${action.playerTarget} n'a plus d'effet.  `;
     }
 
     getEnd(action: Action, replayData: ReplayData): string {
         const playerName = action.player?.includes("p2") ? replayData.game.players[1].name : replayData.game.players[0].name;
-        return `${action.pokemon} de ${playerName} n'est plus : ${this.getEndFr(action.move || '')}. \n `;
+        return `${action.pokemon} de ${playerName} n'est plus : ${this.getEndFr(action.move || '')}.  `;
     }
 
     getEndFr(end: string): string {
@@ -202,7 +202,7 @@ export class ActionTxtForIAService {
 
     getCurestatus(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `${action.target} de ${playerName} est guéri de son statut : ${this.getCureStatusFr(action.from || '')}. \n `;
+        return `${action.target} de ${playerName} est guéri de son statut : ${this.getCureStatusFr(action.from || '')}.  `;
     }
 
     getCureStatusFr(status: string): string {

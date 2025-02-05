@@ -4,6 +4,7 @@ export interface Pokemon {
   item: string;
   ability: string;
   moves: string[];
+  nickname?: string;
 }
 
 export interface Player {

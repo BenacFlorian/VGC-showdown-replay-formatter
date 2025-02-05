@@ -16,12 +16,12 @@ export class DamageTxtForIAService {
 
     getSupereffective(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `C'est super efficace sur ${action.target} de ${playerName}. \n `;
+        return `C'est super efficace sur ${action.target} de ${playerName}.  `;
     }
 
     getCrit(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `C'est un coup critique sur ${action.target} de ${playerName}. \n `;
+        return `C'est un coup critique sur ${action.target} de ${playerName}.  `;
     }
 
 
@@ -61,13 +61,13 @@ export class DamageTxtForIAService {
         let moveEffect = '';
         if(damage_list.length > 1) {
             if(damage_list[0].damageValue == 'KO' && damage_list[1].damageValue == 'KO') {
-            moveEffect += `ça met ${damage_list[0].damageTarget} et ${damage_list[1].damageTarget} KO \n `;
+            moveEffect += `ça met ${damage_list[0].damageTarget} et ${damage_list[1].damageTarget} KO  `;
             }
             if(damage_list[0].damageValue == 'KO' && damage_list[1].damageValue != 'KO') {
-            moveEffect += `ça met ${damage_list[0].damageTarget} KO et laisse ${damage_list[1].damageValue} de point de vie à ${damage_list[1].damageTarget} \n `;
+            moveEffect += `ça met ${damage_list[0].damageTarget} KO et laisse ${damage_list[1].damageValue} de point de vie à ${damage_list[1].damageTarget}  `;
             }
             if(damage_list[0].damageValue != 'KO' && damage_list[1].damageValue == 'KO') {
-            moveEffect += `ça met ${damage_list[1].damageTarget} KO et laisse ${damage_list[0].damageValue} de point de vie à ${damage_list[0].damageTarget} \n `;
+            moveEffect += `ça met ${damage_list[1].damageTarget} KO et laisse ${damage_list[0].damageValue} de point de vie à ${damage_list[0].damageTarget}  `;
             }
         }else{
             const prefix = way != 'damageFrom' ? 'il lui laisse' : 'il lui reste';
@@ -92,7 +92,7 @@ export class DamageTxtForIAService {
             damageValue: damageValue
         }]; 
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `${action.target} de ${playerName} subit des dégats de ${this.getDamageFromFr(action)}, ${this.formatDamage(damageList, 'damageFrom')}. \n `;//${this.formatDamageRecoil(action)}
+        return `${action.target} de ${playerName} subit des dégats de ${this.getDamageFromFr(action)}, ${this.formatDamage(damageList, 'damageFrom')}.  `;//${this.formatDamageRecoil(action)}
     }
 
     getDamageFromFr(action: Action): string {
