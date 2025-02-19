@@ -13,62 +13,62 @@ export class ActionTxtForIAService {
             const p1Player = replayData.game.players[0];
             const p2Player = replayData.game.players[1];
             const isZoneTerrainTargeted = action.damage?.includes(action.playerTarget?.includes("p1") ? 'p2' : 'p1');
-            if(isZoneTerrainTargeted) resultTxt += ' sur tous les pokemons du terrain, et inflige des dégats ';
+            if(isZoneTerrainTargeted) resultTxt += ' on all pokemons on the field, and inflict damage ';
             const targets = action.damage?.split(' |').filter(item=> !!item && item != '')
                 .map(item=>{
                     const player = item.split('*')[0].trim().split(':')[0]?.includes("p1") ? p1Player.name : p2Player.name;
-                    const target = `${ item.split('*')[0].trim().split(':')[1]} de ${player}`;
+                    const target = `${ item.split('*')[0].trim().split(':')[1]} of ${player}`;
                     return target;
                 }) || [];
-            return resultTxt + ' sur ' + this.utilityService.formatList(targets);
+            return resultTxt + ' on ' + this.utilityService.formatList(targets);
         }else{
             const playerTarget = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-            const actionTarget = action.playerTarget != action.player ? `${action.target} de ${playerTarget}` : '';
+            const actionTarget = action.playerTarget != action.player ? `${action.target} of ${playerTarget}` : '';
             if(action.playerTarget == '[still]'){
                 switch(action.move){
-                    case 'Solar Beam': return ' et rayonne';
-                    default: return ' et disparait ';
+                    case 'Solar Beam': return ' and shines';
+                    default: return ' and disappears';
                 }
             }else{
-                return ' sur ' + actionTarget;
+                return ' on ' + actionTarget;
             };
         }
     }
 
     getAbility(action: Action): string {
         let details = '';
-        if(action.move == 'Sword of Ruin') details = ', ce qui augmente les dégats physiques infligés aux pokemon alentours';
-        return `${action.pokemon} utilise sont talent : ${action.move}${details}.  `;
+        if(action.move == 'Sword of Ruin') details = ', which increases the physical damage inflicted on nearby pokemons';
+        return `${action.pokemon} uses its ability : ${action.move}${details}.  `;
     }
 
     getBoost(action: Action, moveDamage?: string): string {
         if(!action.boost) return '';
         if(action.boost?.split(',').length > 1){
-            return !!moveDamage ? `, et gagne plusieurs boost de statistiques : ${action.boost}, ` : `, et gagne plusieurs boost de statistiques : ${action.boost}`;
+            return !!moveDamage ? `, and gains several boosts of statistics : ${action.boost}, ` : `, and gains several boosts of statistics : ${action.boost}`;
         }
-        return !!moveDamage ? `, et gagne un boost de statistique : ${action.boost}, ` : `, et gagne un boost de statistique : ${action.boost}`;
+        return !!moveDamage ? `, and gains a boost of statistics : ${action.boost}, ` : `, and gains a boost of statistics : ${action.boost}`;
     }
 
 
     getUnboost(action: Action, moveDamage: string): string {
         if(!action.unboost) return '';
         if(action.unboost?.split(',').length > 1){
-            return !!moveDamage ? `, et perd plusieurs boosts de statistique : ${action.unboost}, ` : `, et perd plusieurs boosts de statistique : ${action.unboost}`;
+            return !!moveDamage ? `, and loses several boosts of statistics : ${action.unboost}, ` : `, and loses several boosts of statistics : ${action.unboost}`;
         }
-        return !!moveDamage ? `, et perd un boost de statistique : ${action.unboost}, ` : `, et perd un boost de statistique : ${action.unboost}`;
+        return !!moveDamage ? `, and loses a boost of statistics : ${action.unboost}, ` : `, and loses a boost of statistics : ${action.unboost}`;
     }
 
 
     getMove(action: Action): string {
-        if(action.move === 'Reflect') return `${action.move}, ce qui réduit de moitié les dégats phyique reçu par son équipe pour les tours à venir`;
-        if(action.move === 'Light Screen') return `${action.move}, ce qui réduit de moitié les dégats spéciaux reçu par son équipe pour les tours à venir`;
-        if(action.move === 'Wide Guard') return `${action.move}, ce qui protège son équipe des attaques de zones pour ce tour`;
-        if(action.move === 'Imprison') return `${action.move}, ce qui empêche l'équipe adverse d'utiliser les attaques qu'il possède pour les tours a venir`;
-        if(action.move === 'Tailwind') return `${action.move}, ce qui double la vitesse des pokemon de son équipe pour 4 tours, celui la compris`;
-        if(action.move === 'Mist') return `${action.move}, ce qui bloque les modifications de statistiques induites par l'adversaire pendant 5 tours`;
+        if(action.move === 'Reflect') return `${action.move}, which halves the physical damage received by its team for the next turns`;
+        if(action.move === 'Light Screen') return `${action.move}, which halves the special damage received by its team for the next turns`;
+        if(action.move === 'Wide Guard') return `${action.move}, which protects its team from zone moves for this turn`;
+        if(action.move === 'Imprison') return `${action.move}, which prevents the opposing team from using the moves it possesses for the next turn`;
+        if(action.move === 'Tailwind') return `${action.move}, which doubles the speed of its team's pokemons for 4 turns, including this one`;
+        if(action.move === 'Mist') return `${action.move}, which blocks the modifications of statistics induced by the opponent for 5 turns`;
 
         const isZoneMove = action.target?.includes('spread');
-        return `${action.move} ${isZoneMove ? '(move de zone)' : ''}` || '';
+        return `${action.move} ${isZoneMove ? '(zone move)' : ''}` || '';
     }
 
 
@@ -76,33 +76,33 @@ export class ActionTxtForIAService {
         let actionTextFr = '';
         let becauseTextFr = '';
         switch(action.move){
-            case 'unboost': actionTextFr = 'réduction de statistique';
+            case 'unboost': actionTextFr = 'statistic reduction';
             break;
-            case 'heal': actionTextFr = 'soin';
+            case 'heal': actionTextFr = 'heal';
             break;
             default: actionTextFr = action.move || '';
         }
-        if (action.from?.includes('ability')) becauseTextFr = ` à cause de son talent : ${action.from?.toString().split(':')[1].trim()}`
-        const onWho = !action.isSamePlayerWhoFail ? 'sur le' : 'du';
+        if (action.from?.includes('ability')) becauseTextFr = ` because of its ability : ${action.from?.toString().split(':')[1].trim()}`
+        const onWho = !action.isSamePlayerWhoFail ? 'on the' : 'of the';
 
         const playerName = replayData.game.players.find(player=> player.id == action.playerTarget?.replace('a','').replace('b',''))?.name;
-        return `La tentative de ${actionTextFr} ${onWho} ${action.target} de ${playerName} rate${becauseTextFr}.  `;
+        return `The attempt of ${actionTextFr} ${onWho} ${action.target} of ${playerName} fails${becauseTextFr}.  `;
     }
 
     getImmune(action: Action): string {
         if(action.from?.includes('ability')){
-            return `${action.target} est immunisé contre ${action.move} à cause de son talent : ${action.from?.split(':')[1]}.  `;
+            return `${action.target} is immune to ${action.move} because of its ability : ${action.from?.split(':')[1]}.  `;
         }
-        return `${action.target} est immunisé contre ${action.move}.  `;
+        return `${action.target} is immune to ${action.move}.  `;
     }
 
     getActivate(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
         if(action.move?.includes('move:')){
-            return `${action.target} est protégé grâce à ${action.move?.replace('move: ', '')}.  `;
+            return `${action.target} is protected thanks to ${action.move?.replace('move: ', '')}.  `;
         }else{
             switch(action.move){
-                case 'confusion': return `${action.target} de ${playerName} est confus.  `;
+                case 'confusion': return `${action.target} of ${playerName} is confused.  `;
                 default: return ``;
             }
         }
@@ -112,8 +112,8 @@ export class ActionTxtForIAService {
     getStart(action: Action): string {
         const move = action.move?.includes('move:') ? action.move?.replace('move: ', '') : action.move;
         switch(move){
-            case 'Yawn': return `${action.target} deviens somnolent à cause de ${action.from?.split(':')[1]}, il s'endormira s'il attaque une fois de plus.  `;
-            case 'confusion': return `${action.target} deviens confus à cause de ${action.from === 'fatigue' ? ' la fatigue (un effet de son attaque)' : action.from}.  `;
+            case 'Yawn': return `${action.target} becomes drowsy because of ${action.from?.split(':')[1]}, it will fall asleep if it attacks again.  `;
+            case 'confusion': return `${action.target} becomes confused because of ${action.from === 'fatigue' ? ' fatigue (an effect of its attack)' : action.from}.  `;
         }
         return "";
     }
@@ -121,19 +121,19 @@ export class ActionTxtForIAService {
 
     getStatus(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `${action.target} de ${playerName} est maintenant ${this.getStatusFr(action.status || '')}.  `;
+        return `${action.target} of ${playerName} is now ${this.getStatusFr(action.status || '')}.  `;
     }
 
     getStatusFr(status: string): string {
         switch(status){
-            case 'slp': return 'endormi';
-            case 'brn': return 'brulé';
-            case 'frz': return 'glacé';
-            case 'psn': return 'empoisonné';
-            case 'par': return 'paralyse';
-            case 'slp': return 'endormi';
-            case 'frz': return 'glacé';
-            case 'psn': return 'empoisonné';
+            case 'slp': return 'asleep';
+            case 'brn': return 'burned';
+            case 'frz': return 'frozen';
+            case 'psn': return 'poisoned';
+            case 'par': return 'paralyzed';
+            case 'slp': return 'asleep';
+            case 'frz': return 'frozen';
+            case 'psn': return 'poisoned';
             default: return '';
         }
     }
@@ -141,77 +141,77 @@ export class ActionTxtForIAService {
     getCant(action: Action, replayData: ReplayData): string {
         let reason = '';
         switch(action.from){
-            case 'slp': reason = 'il est endormi'; 
+            case 'slp': reason = 'it is asleep'; 
                 break;
-            case 'recharge': reason = 'il est en train de se recharger';
+            case 'recharge': reason = 'it is recharging';
                 break;
-            case 'flinch': reason = 'il a été effrayé';
+            case 'flinch': reason = 'it has been frightened';
         }
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `${action.target} de ${playerName} ne peut pas attaquer ce tour-ci car ${reason}.  `;
+        return `${action.target} of ${playerName} can't attack this turn because ${reason}.  `;
     }
 
     getFieldStart(action: Action, replayData: ReplayData): string {
         const playerName = action.player?.includes("p2") ? replayData.game.players[1].name : replayData.game.players[0].name;
         if(action.from?.includes('ability')){
-            return `${action.pokemon} de ${playerName} place son ${action.move} à cause de son talent : ${action.from?.split(':')[1]}.  `;
+            return `${action.pokemon} of ${playerName} places its ${action.move} because of its ability : ${action.from?.split(':')[1]}.  `;
         }
         // console.log(action);
         if(action.move?.includes('Trick Room')){
-            return `Pendant 5 tours, l'ordre d'attaque des pokemons est inversé.  `;
+            return `For 5 turns, the order of attack of the pokemons is reversed.  `;
         }
-        return `${action.pokemon} de ${playerName} place son ${action.move}.  `;
+        return `${action.pokemon} of ${playerName} places its ${action.move}.  `;
     }
 
     getHeal(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        const reason = !!action.from ? ` grâce à ${action.from}` : '';
+        const reason = !!action.from ? ` because of ${action.from}` : '';
         if(!!action.move){
-            return `${action.target} de ${playerName} utilise ${action.move} et se soigne jusqu'a ${action.pv} point de vie.  `;
+            return `- ${action.target} of ${playerName} uses ${action.move} and heals up to ${action.pv} point of life.  `;
         }else{
-            return `${action.target} de ${playerName} est soigné jusqu'a ${action.pv} point de vie${reason}.  `;
+            return `- ${action.target} of ${playerName} is healed up to ${action.pv} point of life${reason}.  `;
         }        
     }
 
     getTerastallize(action: Action, replayData: ReplayData): string {
         const playerName = action.player?.includes("p2") ? replayData.game.players[1].name : replayData.game.players[0].name;
-        return `${action.pokemon} de ${playerName} se teracrystalise en type ${action.type}.  `;
+        return `- ${action.pokemon} of ${playerName} becomes terastallized in type ${action.type}.  `;
     }
 
     getClearboost(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `Les boosts de ${action.target} de ${playerName} ont été annulés.  `;
+        return `- The boosts of ${action.target} of ${playerName} have been canceled.  `;
     }
 
     getSideend(action: Action): string {
         const move = action.move?.includes('move:') ? action.move?.replace('move: ', '') : action.move;
-        return `${move} de ${action.playerTarget} n'a plus d'effet.  `;
+        return `- ${move} of ${action.playerTarget} has no more effect.  `;
     }
 
     getEnd(action: Action, replayData: ReplayData): string {
         const playerName = action.player?.includes("p2") ? replayData.game.players[1].name : replayData.game.players[0].name;
-        return `${action.pokemon} de ${playerName} n'est plus : ${this.getEndFr(action.move || '')}.  `;
+        return `- ${action.pokemon} of ${playerName} is no longer : ${this.getEndFr(action.move || '')}.  `;
     }
 
     getEndFr(end: string): string {
         switch(end){
-            case 'confusion': return 'confus';
+            case 'confusion': return 'confusion';
         }
         return '';
     }
 
     getCurestatus(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `${action.target} de ${playerName} est guéri de son statut : ${this.getCureStatusFr(action.from || '')}.  `;
+        return `${action.target} of ${playerName} is cured of its status : ${this.getCureStatusFr(action.from || '')}.  `;
     }
 
     getCureStatusFr(status: string): string {
         switch(status){
-            case 'slp': return ' sommeil';
-            case 'brn': return ' brulé';
-            case 'frz': return ' gelé';
-            case 'psn': return ' empoisonné';
-            case 'par': return ' paralysé';
+            case 'slp': return 'sleep';
+            case 'brn': return 'burn';
+            case 'frz': return 'frozen';
+            case 'psn': return 'poisoned';
+            case 'par': return 'paralyzed';
             default: return '';
         }
     }

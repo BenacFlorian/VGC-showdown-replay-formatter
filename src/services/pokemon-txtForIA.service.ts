@@ -10,12 +10,12 @@ export class PokemonTxtForIAService {
     getLeads(replayData: ReplayData): string {
         return replayData.game.game_info.leads.map(lead=> {  
             const playerName = replayData.game.players.find(player=> player.id == lead.split(':')[0].replace('a','').replace('b',''))?.name;
-            return ` Le joueur ${playerName} envoie ${lead.split(':')[1]}. `
+            return ` ${playerName} sends ${lead.split(':')[1]}. `
         }).join('') + '  ';
     }
 
     getPokemonString(pokemon: Pokemon): string {
-        return `${pokemon.pokemon} ( Niveau: ${pokemon.level}, Item : ${pokemon.item}, Ability : ${pokemon.ability}, Moves: ${pokemon.moves.join(', ')} )`;
+        return `${pokemon.pokemon} ( Level: ${pokemon.level}, Item : ${pokemon.item}, Ability : ${pokemon.ability}, Moves: ${pokemon.moves.join(', ')} )`;
     }
 
     getNicknames(replayData: ReplayData): string {
@@ -23,7 +23,7 @@ export class PokemonTxtForIAService {
         replayData.game.players.forEach(player=> {
             player.team.forEach(pokemon=> {
                 if(!!pokemon.nickname && pokemon.nickname?.trim() !== pokemon.pokemon?.trim()) {
-                    nicknamesSentence.push(`Le pokemon ${pokemon.pokemon} de ${player.name} est renommé pour ce match ${pokemon.nickname}.`);
+                    nicknamesSentence.push(`The pokemon ${pokemon.pokemon} of ${player.name} is renamed for this match ${pokemon.nickname}.`);
                 }
             });
         });

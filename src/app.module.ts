@@ -8,7 +8,8 @@ import { WriteTextForIAService } from './writeTextForIA.service';
 import { PokemonTxtForIAService } from './services/pokemon-txtForIA.service';
 import { DamageTxtForIAService } from './services/damage-txtForIA.service';
 import { ActionTxtForIAService } from './services/action-txtForIA.service';
-
+import { AnalyseReplayService } from './services/analyse-replay-service';
+import { SachaService } from './services/sacha-service';
 @Module({
   imports: [HttpModule],
   controllers: [AppController],
@@ -19,7 +20,9 @@ import { ActionTxtForIAService } from './services/action-txtForIA.service';
     WriteTextForIAService, 
     PokemonTxtForIAService, 
     DamageTxtForIAService, 
-    ActionTxtForIAService
+    ActionTxtForIAService,
+    AnalyseReplayService,
+    SachaService
   ],
 })
 export class AppModule {}

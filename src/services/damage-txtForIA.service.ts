@@ -11,17 +11,17 @@ export class DamageTxtForIAService {
     getResisted(action: Action): string {
         if(!action.resisted) return '';
         const resisted_list = action.resisted?.split(' |').filter(item=> !!item && item != '').map(item=> item.split(':')[1].trim()) || [];
-        return resisted_list?.length > 1 ?  `, ça a été résisté par ${resisted_list[0]} et ${resisted_list[1]}` : `, ça a été résisté par ${resisted_list[0]}`;
+        return resisted_list?.length > 1 ?  `, it was resisted by ${resisted_list[0]} and ${resisted_list[1]}` : `, it was resisted by ${resisted_list[0]}`;
     }
 
     getSupereffective(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `C'est super efficace sur ${action.target} de ${playerName}.  `;
+        return `It's super effective on ${action.target} of ${playerName}.  `;
     }
 
     getCrit(action: Action, replayData: ReplayData): string {
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `C'est un coup critique sur ${action.target} de ${playerName}.  `;
+        return `It's a critical hit on ${action.target} of ${playerName}.  `;
     }
 
 
@@ -42,7 +42,7 @@ export class DamageTxtForIAService {
         if(!!action.player && action.damage.includes(action.player)){
             const damageRecoil = damage_list.find(damage=> damage.damageTargetId == action.player);
             const damageClassic = damage_list.filter(damage=> damage.damageTargetId != action.player);
-            moveEffect = this.formatDamage(damageClassic) + ' et ' + this.formatDamageRecoil(damageRecoil, action);
+            moveEffect = this.formatDamage(damageClassic) + ' and ' + this.formatDamageRecoil(damageRecoil, action);
         }else{
             moveEffect = this.formatDamage(damage_list);
         }
@@ -50,31 +50,32 @@ export class DamageTxtForIAService {
     }
 
     formatDamageRecoil(damageRecoil: any, action: Action){
-        const result = damageRecoil.damageValue == 'KO' ? 'ce qui le met KO' : `se retrouvant avec ${damageRecoil.damageValue} de point de vie`;
+        const result = damageRecoil.damageValue == 'KO' ? 'which puts it KO' : `which leaves it with ${damageRecoil.damageValue} point of life`;
         if(action.itemPokemonMoving ===  'LifeOrb'){
-            return `${damageRecoil.damageTarget} s'inflige des dégats à cause de son item ${action.itemPokemonMoving}, ${result}`;
+            return `${damageRecoil.damageTarget} inflicts damage to itself because of its item ${action.itemPokemonMoving}, ${result}`;
         }
-        return `${damageRecoil.damageTarget} s'inflige des dégats à cause de son attaque ${action.move}, ${result}`;
+        return `${damageRecoil.damageTarget} inflicts damage to itself because of its attack ${action.move}, ${result}`;
     }
 
     formatDamage(damage_list: any, way?: string){
         let moveEffect = '';
         if(damage_list.length > 1) {
             if(damage_list[0].damageValue == 'KO' && damage_list[1].damageValue == 'KO') {
-            moveEffect += `ça met ${damage_list[0].damageTarget} et ${damage_list[1].damageTarget} KO  `;
+            moveEffect += `it puts ${damage_list[0].damageTarget} and ${damage_list[1].damageTarget} KO  `;
             }
             if(damage_list[0].damageValue == 'KO' && damage_list[1].damageValue != 'KO') {
-            moveEffect += `ça met ${damage_list[0].damageTarget} KO et laisse ${damage_list[1].damageValue} de point de vie à ${damage_list[1].damageTarget}  `;
+            moveEffect += `it puts ${damage_list[0].damageTarget} KO and leaves ${damage_list[1].damageValue} point of life to ${damage_list[1].damageTarget}  `;
             }
             if(damage_list[0].damageValue != 'KO' && damage_list[1].damageValue == 'KO') {
-            moveEffect += `ça met ${damage_list[1].damageTarget} KO et laisse ${damage_list[0].damageValue} de point de vie à ${damage_list[0].damageTarget}  `;
+            moveEffect += `it puts ${damage_list[1].damageTarget} KO and leaves ${damage_list[0].damageValue} point of life to ${damage_list[0].damageTarget}  `;
             }
         }else{
-            const prefix = way != 'damageFrom' ? 'il lui laisse' : 'il lui reste';
             if(damage_list[0].damageValue == 'KO') {
-                moveEffect += `ça met ${damage_list[0].damageTarget} KO `;
+                moveEffect += `it puts ${damage_list[0].damageTarget} KO `;
             }else{
-                moveEffect += `${prefix} ${damage_list[0].damageValue} de point de vie `;
+                const prefix = way != 'damageFrom' ? ' and leaves it with ' : 'has';
+                const sufix = way != 'damageFrom' ? '' : ` to ${damage_list[0].damageTarget}`;
+                moveEffect += `${prefix} ${damage_list[0].damageValue} point of life${sufix}`;
             }
         }
         return moveEffect;
@@ -92,17 +93,17 @@ export class DamageTxtForIAService {
             damageValue: damageValue
         }]; 
         const playerName = action.playerTarget?.includes("p1") ? replayData.game.players[0].name : replayData.game.players[1].name;
-        return `${action.target} de ${playerName} subit des dégats de ${this.getDamageFromFr(action)}, ${this.formatDamage(damageList, 'damageFrom')}.  `;//${this.formatDamageRecoil(action)}
+        return `${action.target} of ${playerName} suffers damage from ${this.getDamageFromFr(action)}, ${this.formatDamage(damageList, 'damageFrom')}.  `;//${this.formatDamageRecoil(action)}
     }
 
     getDamageFromFr(action: Action): string {
         const damageFrom = action.from?.replace('[from]', '').replace('item: ','').trim();
         switch(damageFrom){
-            case 'brn': return 'sa brûlure';
-            case 'psn': return 'son empoisonnement';
-            case 'confusion': return 'sa confusion';
-            case 'Life Orb': return 'son item Life Orb';
-            case 'Recoil': return 'recul';
+            case 'brn': return 'its burn';
+            case 'psn': return 'its poison';
+            case 'confusion': return 'its confusion';
+            case 'Life Orb': return 'its Life Orb';
+            case 'Recoil': return 'recoil';
             case 'Salt Cure': return 'Salt Cure';
             default: return '';
         }

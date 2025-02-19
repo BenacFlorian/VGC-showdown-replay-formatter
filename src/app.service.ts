@@ -1,16 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
-import { Observable, from, map, mergeMap, catchError, forkJoin } from 'rxjs';
+import { Observable, from, map, mergeMap, catchError, forkJoin, of } from 'rxjs';
 import { ReplayData, Player, Pokemon, Turn, Action } from './types/game.types';
 import { ParseLogsService } from './parseLogs.service';
 import { WriteTextForIAService } from './writeTextForIA.service';
+import { AnalyseReplayService } from './services/analyse-replay-service';
 
 @Injectable()
 export class AppService {
   constructor(
     private httpService: HttpService,
     private parseLogsService: ParseLogsService,
-    private writeTextForIAService: WriteTextForIAService
+    private writeTextForIAService: WriteTextForIAService,
+    private analyseReplayService: AnalyseReplayService
   ) {}
 
 
@@ -36,4 +38,11 @@ export class AppService {
     );
   }
 
+  analyseReplay(data: string): Observable<{ tour: number; action: string; analyse: string }[]> {
+    return this.analyseReplayService.analyseReplay(data).pipe(
+      map(result => {
+        return result;
+      })
+    );
+  }
 }
