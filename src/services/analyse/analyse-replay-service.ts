@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { Observable, from, map, mergeMap, catchError, forkJoin } from 'rxjs';
-import { ReplayData, Player, Pokemon, Turn, Action } from '../types/game.types';
-import { ParseLogsService } from '../parseLogs.service';
-import { WriteTextForIAService } from '../writeTextForIA.service';
+import { ReplayData, Player, Pokemon, Turn, Action } from '../../types/game.types';
+import { ParseLogsService } from '../parse-logs/parse-logs.service';
+import { WriteTextForIAService } from '../write-txt-for-ia/write-text-for-IA.service';
 import { SachaService } from './sacha-service';
 
 @Injectable()

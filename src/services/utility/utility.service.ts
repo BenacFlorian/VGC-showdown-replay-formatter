@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { Observable, from, map, mergeMap, catchError, forkJoin } from 'rxjs';
-import { ReplayData, Player, Pokemon, Turn, Action } from '../types/game.types';
+import { ReplayData, Player, Pokemon, Turn, Action } from '../../types/game.types';
 import { resourceUsage } from 'process';
 
 @Injectable()

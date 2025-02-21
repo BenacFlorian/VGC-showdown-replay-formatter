@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Player, Pokemon, ReplayData, Action } from './types/game.types';
+import { Player, Pokemon, ReplayData, Action } from '../../types/game.types';
 import { time } from 'console';
 
 @Injectable()

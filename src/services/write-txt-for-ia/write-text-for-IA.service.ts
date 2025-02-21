@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Pokemon, ReplayData } from './types/game.types';
-import { Action } from './types/game.types';
-import { UtilityService } from './services/utility.service';
-import { PokemonTxtForIAService } from './services/pokemon-txtForIA.service';
-import { DamageTxtForIAService } from './services/damage-txtForIA.service';
-import { ActionTxtForIAService } from './services/action-txtForIA.service';
+import { Pokemon, ReplayData } from '../../types/game.types';
+import { Action } from '../../types/game.types';
+import { UtilityService } from '../utility/utility.service';
+import { PokemonTxtForIAService } from './pokemon-txt-for-IA.service';
+import { DamageTxtForIAService } from './damage-txt-for-IA.service';
+import { ActionTxtForIAService } from './action-txt-for-IA.service';
 import { log } from 'console';
 
 @Injectable()

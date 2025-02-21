@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Action, Pokemon, ReplayData } from '../types/game.types';
-import { UtilityService } from './utility.service';
+import { Action, Pokemon, ReplayData } from '../../types/game.types';
+import { UtilityService } from '../utility/utility.service';
 
 @Injectable()
 export class PokemonTxtForIAService {

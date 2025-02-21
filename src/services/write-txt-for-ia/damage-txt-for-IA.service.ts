@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { Action, ReplayData } from '../types/game.types';
-import { UtilityService } from './utility.service';
+import { Action, ReplayData } from '../../types/game.types';
+import { UtilityService } from '../utility/utility.service';
 
 @Injectable()
 export class DamageTxtForIAService {

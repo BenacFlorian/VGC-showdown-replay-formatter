@@ -2,14 +2,15 @@ import { Module } from '@nestjs/common';
 import { HttpModule } from '@nestjs/axios';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UtilityService } from './services/utility.service';
-import { ParseLogsService } from './parseLogs.service';
-import { WriteTextForIAService } from './writeTextForIA.service';
-import { PokemonTxtForIAService } from './services/pokemon-txtForIA.service';
-import { DamageTxtForIAService } from './services/damage-txtForIA.service';
-import { ActionTxtForIAService } from './services/action-txtForIA.service';
-import { AnalyseReplayService } from './services/analyse-replay-service';
-import { SachaService } from './services/sacha-service';
+import { UtilityService } from './services/utility/utility.service';
+import { ParseLogsService } from './services/parse-logs/parse-logs.service';
+import { WriteTextForIAService } from './services/write-txt-for-ia/write-text-for-IA.service';
+import { PokemonTxtForIAService } from './services/write-txt-for-ia/pokemon-txt-for-IA.service';
+import { DamageTxtForIAService } from './services/write-txt-for-ia/damage-txt-for-IA.service';
+import { ActionTxtForIAService } from './services/write-txt-for-ia/action-txt-for-IA.service';
+import { AnalyseReplayService } from './services/analyse/analyse-replay-service';
+import { SachaService } from './services/analyse/sacha-service';
+import { CreateReplaysForFinetuningService } from './services/create-replay-for-fine-tuning/create-replay-for-fine-tuning.service';
 @Module({
   imports: [HttpModule],
   controllers: [AppController],
@@ -22,7 +23,8 @@ import { SachaService } from './services/sacha-service';
     DamageTxtForIAService, 
     ActionTxtForIAService,
     AnalyseReplayService,
-    SachaService
+    SachaService,
+    CreateReplaysForFinetuningService
   ],
 })
 export class AppModule {}
