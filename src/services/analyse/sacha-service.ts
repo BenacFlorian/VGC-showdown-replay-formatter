@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Observable, from, map, mergeMap, catchError, throwError } from 'rxjs';
+import { Observable, from, map, mergeMap, catchError, throwError, defer } from 'rxjs';
+
+type GradioClient = {
+  predict: (endpoint: string, payload: any) => Promise<any>;
+};
+
 @Injectable()
 export class SachaService {
   constructor() {}
@@ -38,7 +43,30 @@ export class SachaService {
     Game description to analyze:
   `;
 
+  private modelId = 'Nac31/Sacha-0';
+
   queryModel(prompt: string, nbTurn: number): Observable<any> {
+    return defer(() => from(import('@gradio/client'))).pipe(
+      mergeMap(({ Client }) => Client.connect(this.modelId)),
+      mergeMap((client: GradioClient) => {
+        return from(client.predict("/predict", {
+          message: prompt,
+          temperature: 0.1,
+          max_new_tokens: 400 * nbTurn,
+        }));
+      }),
+      map(response => {
+        console.log('Réponse du modèle:', response);
+        return response;
+      }),
+      catchError(error => {
+        console.error('Erreur lors de la requête au modèle:', error);
+        return throwError(() => new Error('Erreur lors de la requête au modèle'));
+      })
+    );
+  }
+
+  queryModelViaInferenceAPI(prompt: string, nbTurn: number): Observable<any> {
     return from(fetch(
       this.apiUrl,
       {

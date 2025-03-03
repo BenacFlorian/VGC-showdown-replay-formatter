@@ -7,6 +7,18 @@ export interface Pokemon {
   nickname?: string;
 }
 
+export interface Damage {
+  damageTarget: string;
+  damageTargetId: string;
+  damageValue: string;
+}
+
+export interface DamageByTarget {
+  damageTargetId: string;
+  damages: Damage[];
+  damageTarget: string;
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -34,6 +46,7 @@ export interface Action {
   redirected?: boolean;
   playerTarget?: string;
   from?: string;
+  fromDetail?: string;
   isSamePlayerWhoFail?: boolean;
 }
 
@@ -67,3 +80,8 @@ export interface ReplayData {
   pov: string;
   game: Game;
 } 
+
+export interface SheetResult {
+  prompt: string;
+  response: string;
+}

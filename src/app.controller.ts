@@ -1,7 +1,6 @@
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { AppService } from './app.service';
-import { Observable, of, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, Observable, of } from 'rxjs';
 
 @Controller()
 export class AppController {
@@ -17,7 +16,11 @@ export class AppController {
   @HttpCode(200)
   createReplaysForFinetuning(): Observable<string> {
     return this.appService.createReplaysForFinetuning().pipe(
-      map(results => `Traitement terminé: ${results.length} fichiers traités`)
+      map(results => { 
+        // console.log(results[0]); 
+        
+        return `Traitement terminé: ${results.length} fichiers traités`
+      })
     );
   }
 

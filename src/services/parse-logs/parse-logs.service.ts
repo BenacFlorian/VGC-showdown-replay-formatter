@@ -1,9 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { Player, Pokemon, ReplayData, Action } from '../../types/game.types';
 import { time } from 'console';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class ParseLogsService {
+
+    private getTurnToDebug(): number {
+        try {
+            const debugPath = path.join(process.cwd(), 'debug.json');
+            const debugContent = fs.readFileSync(debugPath, 'utf-8');
+            const debugData = JSON.parse(debugContent);
+            return parseInt(debugData.turn) || 0;
+        } catch (error) {
+            console.error('Erreur lors de la lecture du fichier debug.json:', error);
+            return 13; // valeur par défaut en cas d'erreur
+        }
+    }
 
     public parseGameJson(rawData: string): ReplayData | null {
         const lines = rawData.split('\n');
@@ -18,7 +32,7 @@ export class ParseLogsService {
                     tier: "",
                     rules: [],
                     leads: [],
-                    turns: []
+                    turns: [] 
                 },
                 final_result: {
                     winner: "",
@@ -33,9 +47,13 @@ export class ParseLogsService {
         let leadSent = 0;
         let previousTurnPlayer;
         let gameStarted = false;
+        let turnToDebug = this.getTurnToDebug();
+        let minTurn = turnToDebug == 0 ? 0 : turnToDebug-1;
+        let maxTurn = turnToDebug+1;
+        let isFromMove = false;
         for (const line of lines) {
-            const parts = line.split('|').filter(Boolean);
-            // console.log(parts);
+            const parts = !!line && line != '' ? line.split('|').filter(Boolean) : [];
+            // if(currentTurn < maxTurn && currentTurn >= minTurn) console.log(parts);
             if (parts.length < 2 && parts[0] != 'start') continue;
     
             switch (parts[0]) {
@@ -85,10 +103,6 @@ export class ParseLogsService {
                     break;
     
                 case 'turn':
-                    // pour pouvoir debugger que jusqu'au tour X
-                    if(parseInt(parts[1]) > 13){
-                        return replayData;
-                    }
                     if(parts[1] == '1'){
                         gameStarted = true;
                     }
@@ -107,7 +121,7 @@ export class ParseLogsService {
                     turnActions.push({
                       player: parts[1].split(':')[0],
                       pokemon: parts[1].split(':')[1], // Le Pokémon qui joue
-                      action: 'move',
+                      action: 'move', 
                       itemPokemonMoving: pokemonMoving?.item,
                       redirected: parts.length > 4 && parts[4].includes('[from]lockedmove') ? true : false,
                       move: parts[2],
@@ -127,10 +141,11 @@ export class ParseLogsService {
                     });
                     break;
                 case '-immune':
+                    const lastActionMoveIndex = this.getLastIndexTurnActionMove(turnActions);
                     turnActions.push({
                         action: 'immune',
                         from: parts.length > 2 && parts[2].includes('[from]') ? parts[2].replace('[from]', '') : '',
-                        move: turnActions[turnActions.length - 1].move,
+                        move: turnActions[lastActionMoveIndex].move,
                         target : parts[1].split(':')[1],
                         playerTarget: parts[1].split(':')[0],
                     });
@@ -144,6 +159,7 @@ export class ParseLogsService {
                         pokemon : parts[1].split(':')[1],
                         target : parts[1].split(':')[1],
                         playerTarget: parts[1].split(':')[0],
+                        from: parts.length > 3 ? parts[3].replace('[from]', '').replace('move:', '') : ''
                     });
                     break;
                 case '-end':
@@ -194,6 +210,30 @@ export class ParseLogsService {
                         playerTarget: parts[1].split(':')[1],
                     });
                     break;
+                case '-weather':
+                    if(parts.length >= 2 && parts[2] != '[upkeep]'){
+                        if(parts.length > 3){
+                            turnActions.push({
+                                action: 'weather',
+                                move: parts[1],  // 'SunnyDay'
+                                from: parts[2].includes('ability') ? 'ability' : 'NO FROM FOR WEATHER',
+                                fromDetail: parts[2].includes('ability') ? parts[2].split(':')[1].trim() : '',  // 'Drought'
+                                pokemon: parts[3] ? parts[3].split(':')[1].trim() : '',  // 'Groudon'
+                                    player: parts[3] ? parts[3].split(':')[0].replace('[of] ', '').trim() : ''  // 'p2b'
+                            });
+                        }else if(parts[1] === 'none'){
+                            turnActions.push({
+                                action: 'weather',
+                                move: "None",  // 'SunnyDay'
+                            });
+                        }else{
+                            turnActions.push({
+                                action: 'weather',
+                                move: parts[1],  // 'SunnyDay'
+                            });
+                        }
+                    }
+                    break;
                 case '-fail':  
                     const previousAction = turnActions[turnActions.length - 1];
                     if(previousAction.playerTarget == '[still]'){
@@ -221,28 +261,6 @@ export class ParseLogsService {
                         target: parts[1].split(':')[1],
                     });
                     break;
-                
-                case '-boost':
-                  previousTurnPlayer = turnActions[turnActions.length - 1].player;
-                  if(previousTurnPlayer == parts[1].split(':')[0]){
-                    // boost is for the same pokemon with move this turn (close combat/make it rain...)
-                    if(!!turnActions[turnActions.length - 1].boost){
-                        turnActions[turnActions.length - 1].boost += `, ${parts[2]} ${parts[3]}`;
-                    }else{
-                        turnActions[turnActions.length - 1].boost = `${parts[2]} ${parts[3]}`;
-                    }
-                  }else{          
-                    // boost is due to an other pokemon than the one who's unboosted                   
-                    turnActions.push({
-                        player: parts[1].split(':')[0],
-                        pokemon: parts[1].split(':')[1], // Le Pokémon qui joue
-                        action: 'boost',
-                        boost: `${parts[2]} ${parts[3]}`,
-                        playerTarget: parts[3].split(':')[0],
-                        target: parts.length > 4 && parts[4].includes('spread')? parts[4] : parts[3].split(':')[1]
-                    });
-                  } 
-                  break;
     
                 case '-resisted':
                   if(this.getLastIndexTurnActionMove(turnActions) != -1){
@@ -251,9 +269,13 @@ export class ParseLogsService {
                   break;
     
                 case '-miss':
-                  if(this.getLastIndexTurnActionMove(turnActions) != -1){
-                    turnActions[this.getLastIndexTurnActionMove(turnActions)].miss = true;
-                  }
+                  turnActions.push({
+                    player: parts[1].split(':')[0],
+                    pokemon: parts[1].split(':')[1],
+                    action: 'miss',
+                    target: parts[2].split(':')[1],
+                    playerTarget: parts[2].split(':')[0],
+                  });
                 break;
     
                 case '-activate':
@@ -264,28 +286,116 @@ export class ParseLogsService {
                     target : parts[1].split(':')[1],
                     playerTarget: parts[1].split(':')[0],
                   });
-                  break;
-            
-                case '-unboost':
-                  previousTurnPlayer = turnActions[turnActions.length - 1].player;
-                  if(previousTurnPlayer == parts[1].split(':')[0]){
-                    // unboost is for the same pokemon with move this turn (close combat/make it rain...)
-                    if(!!turnActions[turnActions.length - 1].unboost){
-                        turnActions[turnActions.length - 1].unboost += `, ${parts[2]} ${parts[3]}`;
+                  break;                
+                
+                case '-boost':
+                    isFromMove = turnActions[turnActions.length - 1].action == 'move';
+                    if(!isFromMove){
+                        const ifFromItem = parts[4]?.includes('[from] item:');
+                        if(ifFromItem){
+                            const isPreviousActionEndItem = turnActions[turnActions.length - 1].action == 'enditem';
+                            if(isPreviousActionEndItem){
+                                turnActions.push({ 
+                                    action: 'boost',
+                                    from: 'item',
+                                    boost: `${parts[2]} ${parts[3]}`,
+                                    playerTarget: parts[1].split(':')[0],
+                                    pokemon: parts[1].split(':')[1],
+                                })
+                            }else{
+                                if(!!turnActions[turnActions.length - 1].boost){
+                                    turnActions[turnActions.length - 1].boost += `, ${parts[2]} ${parts[3]}`;
+                                }else{
+                                    turnActions[turnActions.length - 1].boost = `${parts[2]} ${parts[3]}`;
+                                }
+                            }                            
+                        }else{
+                            const isFromAbility = turnActions[turnActions.length - 1].action == 'ability';
+                            if(isFromAbility){
+                                turnActions[turnActions.length - 1].boost = `${parts[2]} ${parts[3]}`;
+                            }else{
+                                const isBoostFromAbilityOfOtherPokemon = turnActions[turnActions.length - 2].action == 'activate' && turnActions[turnActions.length - 2].move?.includes('ability') && turnActions[turnActions.length - 1].action == 'boost';
+                                const isFromAbilityOfOtherPokemon = turnActions[turnActions.length - 1].move?.includes('ability') || isBoostFromAbilityOfOtherPokemon;
+                                const playerTarget = parts[1].split(':')[0];
+                                if(isFromAbilityOfOtherPokemon){
+                                    previousTurnPlayer = turnActions[turnActions.length - 1].playerTarget;
+                                    if(playerTarget != previousTurnPlayer){
+                                        turnActions.push({
+                                            action: 'boost',
+                                            from: 'external_src',
+                                            boost: `${parts[2]} ${parts[3]}`,
+                                            playerTarget: parts[1].split(':')[0],
+                                            pokemon: parts[1].split(':')[1],
+                                        })
+                                    }else{
+                                        if(!!turnActions[turnActions.length - 1].boost){
+                                            turnActions[turnActions.length - 1].boost += `, ${parts[2]} ${parts[3]}`;
+                                        }else{
+                                            turnActions[turnActions.length - 1].boost = `${parts[2]} ${parts[3]}`;
+                                        }
+                                    }
+                                }else{
+                                    turnActions.push({
+                                        action: 'boost',
+                                        from: 'external_src',
+                                        boost: `${parts[2]} ${parts[3]}`,
+                                        playerTarget: parts[1].split(':')[0],
+                                        pokemon: parts[1].split(':')[1],
+                                    })
+                                }
+                            }
+                        }
                     }else{
-                        turnActions[turnActions.length - 1].unboost = `${parts[2]} ${parts[3]}`;
+                        previousTurnPlayer = turnActions[turnActions.length - 1].player;
+                        if(previousTurnPlayer == parts[1].split(':')[0]){
+                            // boost is for the same pokemon with move this turn (close combat/make it rain...)
+                            if(!!turnActions[turnActions.length - 1].boost){
+                                turnActions[turnActions.length - 1].boost += `, ${parts[2]} ${parts[3]}`;
+                            }else{
+                                turnActions[turnActions.length - 1].boost = `${parts[2]} ${parts[3]}`;
+                            }
+                        }else{      
+                            // boost is due to an other pokemon than the one who's unboosted                   
+                            turnActions.push({
+                                player: parts[1].split(':')[0],
+                                pokemon: parts[1].split(':')[1], // Le Pokémon qui joue
+                                action: 'boost',
+                                boost: `${parts[2]} ${parts[3]}`,
+                                playerTarget: parts[3].split(':')[0],
+                                target: parts.length > 4 && parts[4].includes('spread')? parts[4] : parts[3].split(':')[1]
+                            });
+                        } 
+                    }  
+                    break;
+
+                case '-unboost':
+                  isFromMove = turnActions[turnActions.length - 1].action == 'move';
+                  if(!isFromMove){
+                      const isFromAbility = turnActions[turnActions.length - 1].action == 'ability';
+                      if(isFromAbility){
+                          turnActions[turnActions.length - 1].unboost = `${parts[2]} ${parts[3]}`;
+                      }
+                  }else{
+                    previousTurnPlayer = turnActions[turnActions.length - 1].player;
+                    if(previousTurnPlayer == parts[1].split(':')[0]){
+                        // unboost is for the same pokemon with move this turn (close combat/make it rain...)
+                        if(!!turnActions[turnActions.length - 1].unboost){
+                            turnActions[turnActions.length - 1].unboost += `, ${parts[2]} ${parts[3]}`;
+                        }else{
+                            turnActions[turnActions.length - 1].unboost = `${parts[2]} ${parts[3]}`;
+                        }
+                    }else{          
+                        // unboost is due to an other pokemon than the one who's unboosted                   
+                        turnActions.push({
+                            player: parts[1].split(':')[0],
+                            pokemon: parts[1].split(':')[1], // Le Pokémon qui joue
+                            action: 'unboost',
+                            unboost: `${parts[2]} ${parts[3]}`,
+                            playerTarget: parts[3].split(':')[0],
+                            target: parts.length > 4 && parts[4].includes('spread')? parts[4] : parts[3].split(':')[1]
+                        });
                     }
-                  }else{          
-                    // unboost is due to an other pokemon than the one who's unboosted                   
-                    turnActions.push({
-                        player: parts[1].split(':')[0],
-                        pokemon: parts[1].split(':')[1], // Le Pokémon qui joue
-                        action: 'unboost',
-                        unboost: `${parts[2]} ${parts[3]}`,
-                        playerTarget: parts[3].split(':')[0],
-                        target: parts.length > 4 && parts[4].includes('spread')? parts[4] : parts[3].split(':')[1]
-                    });
-                  }
+                  } 
                   break;
     
                 case '-damage':
@@ -296,15 +406,16 @@ export class ParseLogsService {
                             target: parts[1].split(':')[1],
                             action: 'damageFrom',
                             from: parts[3].replace('[from]', ''),
-                            damage: parts[1] + '*' + parts[2]
+                            damage: parts[1] + '*' + parts[2].split(" ")[0]
                         })                        
                     }else{
-                        turnActions[this.getLastIndexTurnActionMove(turnActions)].damage = (turnActions[this.getLastIndexTurnActionMove(turnActions)].damage || '') + parts[1] + '*' + parts[2] + ' |';
+                        turnActions[this.getLastIndexTurnActionMove(turnActions)].damage = (turnActions[this.getLastIndexTurnActionMove(turnActions)].damage || '') + parts[1] + '*' + parts[2].split(" ")[0] + ' |';
                     }
                   }
                   break;
 
                 case '-heal': 
+                    if(parts[3] === '[silent]') break;
                     let isRecoverMove = false;
                     if(this.getLastIndexTurnActionMove(turnActions) != -1){
                         isRecoverMove = turnActions[this.getLastIndexTurnActionMove(turnActions)].move == 'Recover';
@@ -333,7 +444,7 @@ export class ParseLogsService {
                         from: parts.length > 2 ? parts[2].replace('[from]','').replace('[of]','') : '', 
                         player: parts.length > 3 ? parts[3].split(':')[0].replace('[of]','') : (parts.length > 2 ? parts[2].split(':')[0].replace('[of]','') : '')
                     });
-                    break;
+                    break; 
                 case '-fieldend':
                     turnActions.push({
                         action: 'fieldend',
@@ -426,10 +537,6 @@ export class ParseLogsService {
                     leadSent = 0;
                     break;
             }
-            if(currentTurn > 3){// && turnActions[turnActions.length - 1]?.action == 'heal'){
-                // console.log(parts);
-                // console.log(turnActions[turnActions.length - 1]);
-            }
         }
         if (currentTurn !== null) {
             replayData.game.game_info.turns.push({
@@ -440,6 +547,17 @@ export class ParseLogsService {
     
         replayData.pov = players['p1'].name;
         return replayData;
+      }
+
+      private isFromMove(turnActions: Action[], idx?: number): boolean {
+        const index = !!idx ? idx : turnActions.length - 1;
+        const lastAction = turnActions[index];
+        if(lastAction.action == 'move'){
+            return true;
+        }else if(['supereffective','crit','faint'].includes(lastAction.action)){
+            return this.isFromMove(turnActions, index - 1);
+        }
+        return false;
       }
 
       private setNickName(parts: string[], replayData: ReplayData): ReplayData {
