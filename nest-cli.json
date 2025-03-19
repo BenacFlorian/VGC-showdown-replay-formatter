@@ -6,8 +6,8 @@
     "deleteOutDir": true,
     "assets": [
       {
-        "include": "base/*.json",
-        "outDir": "dist/base",
+        "include": "**/base/*.json",
+        "outDir": "./dist",
         "watchAssets": true
       }
     ],

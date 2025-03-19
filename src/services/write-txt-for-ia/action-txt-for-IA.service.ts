@@ -213,7 +213,7 @@ export class ActionTxtForIAService {
             case 'None': return 'clear';
             default: return '';
         }
-    } 
+    }
 
     getFieldStart(action: Action, replayData: ReplayData): string {
         if(action.move == "Gravity"){
@@ -254,7 +254,7 @@ export class ActionTxtForIAService {
         const move = action.move?.includes('move:') ? action.move?.replace('move: ', '') : action.move;
         return `\n - ${move} of ${action.playerTarget} has no more effect.  `;
     }
- 
+
     getEndItem(action: Action, replayData: ReplayData): string {   
         const boost = this.getBoost(action);
         const unboost = this.getUnboost(action, '');

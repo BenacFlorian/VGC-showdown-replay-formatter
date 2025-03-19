@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Observable, from, map, mergeMap, catchError, throwError, defer } from 'rxjs';
+import { Observable, from, map, catchError, throwError, defer, mergeMap } from 'rxjs';
 
-type GradioClient = {
-  predict: (endpoint: string, payload: any) => Promise<any>;
-};
+// Fonction pour contourner le problème d'import ESM
+export const importDynamic = new Function('modulePath', 'return import(modulePath)');
 
 @Injectable()
 export class SachaService {
@@ -46,17 +45,48 @@ export class SachaService {
   private modelId = 'Nac31/Sacha-0';
 
   queryModel(prompt: string, nbTurn: number): Observable<any> {
-    return defer(() => from(import('@gradio/client'))).pipe(
-      mergeMap(({ Client }) => Client.connect(this.modelId)),
-      mergeMap((client: GradioClient) => {
-        return from(client.predict("/predict", {
-          message: prompt,
-          temperature: 0.1,
-          max_new_tokens: 400 * nbTurn,
-        }));
-      }),
+    return defer(async () => {
+      try {
+        // Utilisation de l'import dynamique
+        const { Client } = await importDynamic('@gradio/client');
+        const promptFormated = prompt.replace(/\n/g, '');
+        console.log(promptFormated);
+        
+        const app = await Client.connect("https://nac31-sacha-0.hf.space/", {
+          hf_token: this.apiToken,
+          status_callback: (status) => {
+            console.log('Space status:', status);
+          },
+          events: ["data", "status"]
+        });
+        const submission = app.submit("/predict", [
+          promptFormated,
+          1,
+          400 * nbTurn,
+        ]);
+
+        for await (const msg of submission) {
+          if (msg.type === "data") {
+            return msg.data;
+          }
+          if (msg.type === "status") {
+            console.log('Status update:', msg);
+            if (msg.stage === "error") {
+              throw new Error(`API error: ${msg.message || 'Unknown error'}`);
+            }
+          }
+        }
+
+        throw new Error('No data received from the model');
+      } catch (error) {
+        console.error('Erreur Gradio:', error);
+        throw new Error(`Erreur lors de la requête au modèle: ${error.message}`);
+      }
+    }).pipe(
       map(response => {
         console.log('Réponse du modèle:', response);
+        console.log('Réponse du modèle:', response[0]);
+        // console.log('Réponse du modèle:', response.replace(prompt, ''));
         return response;
       }),
       catchError(error => {
