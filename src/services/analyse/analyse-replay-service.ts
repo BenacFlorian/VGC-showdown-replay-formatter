@@ -3,15 +3,14 @@ import { HttpService } from '@nestjs/axios';
 import { Observable, from, map, mergeMap, catchError, forkJoin } from 'rxjs';
 import { ReplayData, Player, Pokemon, Turn, Action } from '../../types/game.types';
 import { ParseLogsService } from '../parse-logs/parse-logs.service';
-import { WriteTextForIAService } from '../write-txt-for-ia/write-text-for-IA.service';
 import { SachaService } from './sacha-service';
-
+import { WriteTextForLangGraphService } from '../write-txt-for-ia/write-text-for-langraph.service';
 @Injectable()
 export class AnalyseReplayService {
   constructor(
     private httpService: HttpService,
     private parseLogsService: ParseLogsService,
-    private writeTextForIAService: WriteTextForIAService,
+    private writeTextForLangGraphService: WriteTextForLangGraphService,
     private sachaService: SachaService
   ) {}
 
@@ -25,7 +24,7 @@ export class AnalyseReplayService {
     return this.httpService.get(data).pipe(
       map(response => response.data),
       map(text => this.parseLogsService.parseGameJson(text)),
-      map(text => this.writeTextForIAService.translateGameInFr(text as ReplayData))
+      map(text => this.writeTextForLangGraphService.translateGameInFr(text as ReplayData))
     );
   }
 }

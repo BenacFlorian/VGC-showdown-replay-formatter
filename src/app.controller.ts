@@ -27,6 +27,7 @@ export class AppController {
   @Post('analyse-replays')
   @HttpCode(200)
   analyseReplay(@Body() data): Observable<{ tour: number; action: string; analyse: string }[]> {
+    console.log("----- Analyse replay -----")
     return this.appService.analyseReplay(data);
   }
 }

@@ -44,7 +44,89 @@ export class SachaService {
 
   private modelId = 'Nac31/Sacha-0';
 
-  queryModel(prompt: string, nbTurn: number): Observable<any> {
+  queryModel(prompt: string, nbTurn: number): Observable<string> {
+    return from(this.queryModelStreaming(prompt, nbTurn)).pipe(
+      catchError(error => {
+        console.error('Erreur lors du streaming:', error);
+        return throwError(() => new Error(`Erreur streaming : ${error.message}`));
+      })
+    ).pipe(
+      map(response => {
+        console.log("Response :", response);
+        const json = this.buildResponse(response, prompt);
+        return json;
+      })
+    );
+  }
+  async queryModelStreaming(prompt: string, nbTurn: number): Promise<string> {
+    console.log("Sending streaming request to API...");
+    
+    const response = await fetch('https://s8w1nx32dxu2wu-5000.proxy.runpod.net/v1/chat/completions', {
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+      body: JSON.stringify({
+        messages: [{ role: "user", content: prompt }],
+        mode: "instruct",
+        max_tokens: 500 * nbTurn, // Ajuste selon tes besoins actuels
+        temperature: 0.1,
+        top_p: 0.9,
+        stream: true // <-- Active le mode streaming ici
+      })
+    });
+  
+    if (!response.ok || !response.body) {
+      throw new Error(`Erreur HTTP : ${response.status}`);
+    }
+  
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder('utf-8');
+    let fullResponse = "";
+  
+    console.log("----- Début de réponse en streaming -----");
+  
+    let partialChunk = "";
+    let count = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      partialChunk += decoder.decode(value, { stream: true });
+
+      const lines = partialChunk.split("\n");
+
+      for (let i = 0; i < lines.length - 1; i++) {
+        const line = lines[i].trim();
+
+        if (line.startsWith("data:")) {
+          const data = line.replace(/^data:\s*/, '').trim();
+          
+          if (data === "[DONE]") continue;
+
+          try {
+            const json = JSON.parse(data);
+            const content = json.choices[0].delta.content;
+            if (content) {
+              fullResponse += content; // <-- stockage uniquement, aucun affichage
+            }
+          } catch (error) {
+            console.error("Erreur parsing JSON:", error);
+          }
+        }
+      }
+
+      partialChunk = lines[lines.length - 1];
+      count++;
+      if(count % 500 === 0) {
+        console.log("Still in progress, count = "+count+"...");
+      }
+    }
+  
+    console.log("\n----- Fin de réponse en streaming -----");
+    
+    return fullResponse;
+  }
+
+  queryModelViaSpace(prompt: string, nbTurn: number): Observable<any> {
     return defer(async () => {
       try {
         // Utilisation de l'import dynamique
@@ -137,12 +219,12 @@ export class SachaService {
   }
 
   buildResponse(result: any, prompt: string){
-    const response_without_prompt = result[0]?.generated_text?.replace(prompt, '');
-    const response_without_prompt_split = response_without_prompt.split('User 0:');
-
-    const response = response_without_prompt_split[1];
+    const response_without_prompt = result.replace(prompt, '');
+    console.log("=============================================");
+    console.log(response_without_prompt);
+    console.log("=============================================");
     try {
-      const jsonResponse = JSON.parse(response);
+      const jsonResponse = JSON.parse(response_without_prompt.trim());
       return jsonResponse;
     } catch (error) {
       console.error('Erreur:', error);
@@ -151,9 +233,13 @@ export class SachaService {
   }
 
   analyseReplay(data: string): Observable<{tour: number, action: string, analyse: string}[]> {
+    console.log("----- Logs generated -----")
     const nbTurn = this.countTurn(data);
     return this.queryModel(this.prompt+data, nbTurn).pipe(
       map(response => {
+        console.log("=============================================");
+        console.log("----------- Responses returned --------------");
+        console.log("=============================================");
         if (Array.isArray(response)) {
           return response;
         }

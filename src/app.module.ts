@@ -11,6 +11,7 @@ import { ActionTxtForIAService } from './services/write-txt-for-ia/action-txt-fo
 import { AnalyseReplayService } from './services/analyse/analyse-replay-service';
 import { SachaService } from './services/analyse/sacha-service';
 import { CreateReplaysForFinetuningService } from './services/create-replay-for-fine-tuning/create-replay-for-fine-tuning.service';
+import { WriteTextForLangGraphService } from './services/write-txt-for-ia/write-text-for-langraph.service';
 @Module({
   imports: [HttpModule],
   controllers: [AppController],
@@ -19,6 +20,7 @@ import { CreateReplaysForFinetuningService } from './services/create-replay-for-
     UtilityService, 
     ParseLogsService, 
     WriteTextForIAService, 
+    WriteTextForLangGraphService,
     PokemonTxtForIAService, 
     DamageTxtForIAService, 
     ActionTxtForIAService,
